@@ -44,6 +44,8 @@ $(document).ready(function() {
            					break         				        				
            			}
            			break //break from "add" case
+           		case "ass":
+           			
            		case "rem":
            		case "del":
            			$.post(instr)
