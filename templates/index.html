@@ -68,15 +68,14 @@
 			{{ soil_thermometer.name }} - Address: {{ soil_thermometer.address }} Current reading: {{ soil_thermometer.curr_reading }}
 
 			<!-- assign dropdown -->
-			<select id = "{{ soil_thermometer.id }}">
+			<select id = "ass_sth_{{ soil_thermometer.id }}_group">
 			{% for hw_group in HardwareGroup.select() %}
 	  			<option value = "{{ hw_group.id }}"> {{ hw_group.name }} </option>
 			{% endfor %}
-
 			</select>
+
 			<button id = "ass_sth_{{ soil_thermometer.id }}" type="button">Assign</button>
 			<button id = "del_sth_{{ soil_thermometer.id }}" type="button">Delete</button>
-
 			<br>
 		{% endfor %}
 
@@ -86,11 +85,18 @@
 		<br>
 		{% for soil_hygrometer in SoilHygrometer.select().where(SoilHygrometer.group == None) %}
 			{{ soil_hygrometer.name }} - Port: {{ soil_hygrometer.port }} Device: {{ soil_hygrometer.device }} Channel: {{ soil_hygrometer.channel }} Current reading: {{ soil_hygrometer.curr_reading }}
+
+			<!-- assign dropdown -->
+			<select id = "ass_shy_{{ soil_hygrometer.id }}_group">
+			{% for hw_group in HardwareGroup.select() %}
+	  			<option value = "{{ hw_group.id }}"> {{ hw_group.name }} </option>
+			{% endfor %}
+			</select>
+
+			<button id = "ass_shy_{{ soil_hygrometer.id }}" type="button">Assign</button>
 			<button id = "del_shy_{{ soil_hygrometer.id }}" type="button">Delete</button>
 			<br>
 		{% endfor %}
-
-
 
 		<br>
 
@@ -98,6 +104,15 @@
 		<br>
 		{% for pump in Pump.select().where(Pump.group == None) %}
 			{{ pump.name }} - GPIO pin: {{ pump.gpio_pin }} Current status: {{ pump.curr_state }}
+
+			<!-- assign dropdown -->
+			<select id = "ass_pmp_{{ pump.id }}_group">
+			{% for hw_group in HardwareGroup.select() %}
+	  			<option value = "{{ hw_group.id }}"> {{ hw_group.name }} </option>
+			{% endfor %}
+			</select>
+
+			<button id = "ass_pmp_{{ pump.id }}" type="button">Assign</button>
 			<button id = "del_pmp_{{ pump.id }}" type="button">Delete</button>
 			<br>
 		{% endfor %}
@@ -108,6 +123,15 @@
 		<br>
 		{% for fan in Fan.select().where(Fan.group == None) %}
 			{{ fan.name }} - GPIO pin: {{ fan.gpio_pin }} Current status: {{ fan.curr_state }}
+
+			<!-- assign dropdown -->
+			<select id = "ass_fan_{{ fan.id }}_group">
+			{% for hw_group in HardwareGroup.select() %}
+	  			<option value = "{{ hw_group.id }}"> {{ hw_group.name }} </option>
+			{% endfor %}
+			</select>
+
+			<button id = "ass_fan_{{ fan.id }}" type="button">Assign</button>
 			<button id = "del_fan_{{ fan.id }}" type="button">Delete</button>
 			<br>
 		{% endfor %}

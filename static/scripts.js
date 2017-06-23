@@ -7,6 +7,7 @@ $(document).ready(function() {
 
             op = instr_split[0]
             mod = instr_split[1]
+            id = instr_split[2]
 
            	switch (op){
            		case "add":
@@ -19,7 +20,7 @@ $(document).ready(function() {
            				case "sth": 
            					$.post (instr, { 
            						name: $('#add_sth_name').val(),
-           					addr: $('#add_sth_addr').val() 
+           						addr: $('#add_sth_addr').val() 
            					})
            					break
            				case "shy":
@@ -45,7 +46,8 @@ $(document).ready(function() {
            			}
            			break //break from "add" case
            		case "ass":
-           			
+           			$.post(instr, {group: $('#ass_' + mod + '_' + id + '_group').val()})
+           			break //break from "add" case 				          			
            		case "rem":
            		case "del":
            			$.post(instr)

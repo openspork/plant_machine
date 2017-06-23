@@ -38,17 +38,19 @@ def update(op, model, id = None):
 		elif model == 'fan':
 			instance = Fan.create(name = request.form['name'], gpio_pin = request.form['pin'])
 
+	elif op == "ass":
+		instance.group = HardwareGroup.get(HardwareGroup.id == request.form['group'])
+
 	elif op == "del":
 		instance.delete_instance()
 	elif op == "rem":
 		instance.group = None
 	else:
 		print "nothing"
-		instance.save()
-	#if op == "ass":
-		#assign group
+		
+	instance.save()
 
-	return redirect(url_for('.index'))
+	return redirect(url_for('index'))
 
 
 @app.route('/')
