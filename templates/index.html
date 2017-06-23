@@ -72,9 +72,9 @@ Name: <input type="text" id="add_hwg_name">
 	{% for soil_thermometer in SoilThermometer.select().where(SoilThermometer.group == None) %}
 		{{ soil_thermometer.name }} - Address: {{ soil_thermometer.address }} Current reading: {{ soil_thermometer.curr_reading }}
 
-		<select>
+		<select id = "{{ soil_thermometer.id }}">
 		{% for hw_group in HardwareGroup.select() %}
-  			<option id = "{{ hw_group.name }}"> {{ hw_group.name }} </option>
+  			<option value = "{{ hw_group.id }}"> {{ hw_group.name }} </option>
 		{% endfor %}
 
 		</select>
@@ -83,12 +83,6 @@ Name: <input type="text" id="add_hwg_name">
 
 		<br>
 	{% endfor %}
-
-	<!-- add new soil therm -->
-	New Soil Thermometer 
-	Name: <input type="text" id="add_sth_name">
-	Address: <input type="text" id="add_sth_addr">
-	<button id = "add_sth" type="button">Add</button>
 
 	<br>
 
@@ -100,13 +94,7 @@ Name: <input type="text" id="add_hwg_name">
 		<br>
 	{% endfor %}
 
-	<!-- add new soil hygro -->
-	New Soil Hygrometer 
-	Name: <input type="text" id="add_shy_name"> 
-	Port: <input type="text" id="add_shy_port"> 
-	Device: <input type="text" id="add_shy_dev"> 
-	Channel: <input type="text" id="add_shy_chan">
-	<button id = "add_shy" type="button">Add</button>
+
 
 	<br>
 
@@ -118,6 +106,36 @@ Name: <input type="text" id="add_hwg_name">
 		<br>
 	{% endfor %}
 
+	<br>
+
+	<i>Fans:</i>
+	<br>
+	{% for fan in Fan.select().where(Fan.group == None) %}
+		{{ fan.name }} - GPIO pin: {{ fan.gpio_pin }} Current status: {{ fan.curr_state }}
+		<button id = "del_fan_{{ fan.id }}" type="button">Delete</button>
+		<br>
+	{% endfor %}
+
+<h3>Add Resources</h3>
+
+	<!-- add new soil therm -->
+	New Soil Thermometer 
+	Name: <input type="text" id="add_sth_name">
+	Address: <input type="text" id="add_sth_addr">
+	<button id = "add_sth" type="button">Add</button>
+
+	<br>
+
+	<!-- add new soil hygro -->
+	New Soil Hygrometer 
+	Name: <input type="text" id="add_shy_name"> 
+	Port: <input type="text" id="add_shy_port"> 
+	Device: <input type="text" id="add_shy_dev"> 
+	Channel: <input type="text" id="add_shy_chan">
+	<button id = "add_shy" type="button">Add</button>
+
+	<br>
+
 	<!-- add new pump -->
 	New Pump 
 	Name: <input type="text" id="add_pmp_name">
@@ -126,13 +144,12 @@ Name: <input type="text" id="add_hwg_name">
 
 	<br>
 
-	<i>Fans:</i>
-	<br>
-	{% for fan in Fan.select().where(Pump.Group == None) %}
-		{{ fan.name }} - GPIO pin: {{ fan.gpio_pin }} Current status: {{ fan.curr_state }}
-		<button id = "del_fan_{{ fan.id }}" type="button">Delete</button>
-		<br>
-	{% endfor %}
+	<!-- add new fan -->
+	New Fan
+	Name: <input type="text" id="add_fan_name">
+	Pin: <input type="text" id="add_fan_pin">
+	<button id = "add_fan" type="button">Add</button>
+
 
 </body>
 

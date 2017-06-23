@@ -15,13 +15,13 @@ $(document).ready(function() {
            					$.post (instr, { 
            						name: $('#add_hwg_name').val() 
            					})
-           					break;
+           					break
            				case "sth": 
            					$.post (instr, { 
            						name: $('#add_sth_name').val(),
            					addr: $('#add_sth_addr').val() 
            					})
-           					break;
+           					break
            				case "shy":
            					$.post (instr, {
            						name: $('#add_shy_name').val(),
@@ -29,19 +29,25 @@ $(document).ready(function() {
            						dev: $('#add_shy_dev').val(),
            						chan: $('#add_shy_chan').val()
            					})
-           					break;
+           					break
            				case "pmp":
             					$.post (instr, { 
            						name: $('#add_pmp_name').val(),
            						pin: $('#add_pmp_pin').val() 
            					})
-           					break;          				
-           		}
-
-           		
-           		default:
+           					break
+           				case "fan":
+            					$.post (instr, { 
+           						name: $('#add_fan_name').val(),
+           						pin: $('#add_fan_pin').val() 
+           					})
+           					break         				        				
+           			}
+           			break //break from "add" case
+           		case "rem":
+           		case "del":
            			$.post(instr)
-           			break;
+           			break // break from "rem", "del" cases
         	}
             location.reload();
         });
