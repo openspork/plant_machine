@@ -16,4 +16,3 @@ def cleanup():
 	#cleanup GPIO
 	GPIO.cleanup()
 
-	#cleanup SDI
