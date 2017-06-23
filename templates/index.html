@@ -11,78 +11,116 @@
 <!-- list current hardware groups -->
 <h3>Current Hardware Groups:</h3>
 
-{% for hw_group in HardwareGroup.select() %}
-	<b>{{ hw_group.name }}</b><button id =  "del_hwg_{{ hw_group.id }}" type="button">Delete</button>
-	<br>
-
-	<i>Soil Thermometers:</i>
-	<br>
-	{% for soil_thermometer in hw_group.soil_thermometers %}
-		{{ soil_thermometer.name }} - Address: {{ soil_thermometer.address }} Current reading: {{ soil_thermometer.curr_reading }}
-		<button id = "rem_sth_{{ soil_thermometer.id }}" type="button">Remove</button>
-		<button id = "del_sth_{{ soil_thermometer.id }}" type="button">Delete</button>
+	{% for hw_group in HardwareGroup.select() %}
+		<b>{{ hw_group.name }}</b><button id =  "del_hwg_{{ hw_group.id }}" type="button">Delete</button>
 		<br>
+
+		<i>Soil Thermometers:</i>
+		<br>
+		{% for soil_thermometer in hw_group.soil_thermometers %}
+			{{ soil_thermometer.name }} - Address: {{ soil_thermometer.address }} Current reading: {{ soil_thermometer.curr_reading }}
+			<button id = "rem_sth_{{ soil_thermometer.id }}" type="button">Remove</button>
+			<button id = "del_sth_{{ soil_thermometer.id }}" type="button">Delete</button>
+			<br>
+		{% endfor %}
+
+		<br>
+
+		<i>Soil Hygrometers:</i>
+		<br>
+		{% for soil_hygrometer in hw_group.soil_hygrometers %}
+			{{ soil_hygrometer.name }} - Port: {{ soil_hygrometer.port }} Device: {{ soil_hygrometer.device }} Channel: {{ soil_hygrometer.channel }} Current reading: {{ soil_hygrometer.curr_reading }}
+			<button id = "rem_shy_{{ soil_hygrometer.id }}" type="button">Remove</button>
+			<button id = "del_shy_{{ soil_hygrometer.id }}" type="button">Delete</button>
+			<br>
+		{% endfor %}
+		<br>
+
+		<i>Pumps:</i>
+		<br>
+		{% for pump in hw_group.pumps %}
+			{{ pump.name }} - GPIO pin: {{ pump.gpio_pin }} Current status: {{ pump.curr_state }}
+			<br>
+			<button id = "rem_pmp_{{ pump.id }}" type="button">Remove</button>
+			<button id = "del_pmp_{{ pump.id }}" type="button">Delete</button>
+		{% endfor %}
+		<br>
+
+		<i>Fans:</i>
+		<br>
+		{% for fan in hw_group.fans %}
+			{{ fan.name }} - GPIO pin: {{ fan.gpio_pin }} Current status: {{ fan.curr_state }}
+			<br>
+			<button id = "rem_fan_{{ fan.id }}" type="button">Remove</button>
+			<button id = "del_fan_{{ fan.id }}" type="button">Delete</button>
+		{% endfor %}
+
 	{% endfor %}
 
 	<br>
-
-	<i>Soil Hygrometers:</i>
-	<br>
-	{% for soil_hygrometer in hw_group.soil_hygrometers %}
-		{{ soil_hygrometer.name }} - Port: {{ soil_hygrometer.port }} Device: {{ soil_hygrometer.device }} Channel: {{ soil_hygrometer.channel }} Current reading: {{ soil_hygrometer.curr_reading }}
-		<button id = "rem_shy_{{ soil_hygrometer.id }}" type="button">Remove</button>
-		<button id = "del_shy_{{ soil_hygrometer.id }}" type="button">Delete</button>
-		<br>
-	{% endfor %}
-	<br>
-
-	<i>Pumps:</i>
-	<br>
-	{% for pump in hw_group.pumps %}
-		{{ pump.name }} - GPIO pin: {{ pump.gpio_pin }} Current status: {{ pump.curr_state }}
-		<br>
-		<button id = "rem_pmp_{{ pump.id }}" type="button">Remove</button>
-		<button id = "del_pmp_{{ pump.id }}" type="button">Delete</button>
-	{% endfor %}
-	<br>
-
-	<i>Fans:</i>
-	<br>
-	{% for fan in hw_group.fans %}
-		{{ fan.name }} - GPIO pin: {{ fan.gpio_pin }} Current status: {{ fan.curr_state }}
-		<br>
-		<button id = "rem_fan_{{ fan.id }}" type="button">Remove</button>
-		<button id = "del_fan_{{ fan.id }}" type="button">Delete</button>
-	{% endfor %}
-
-{% endfor %}
-
-<br>
-
-<!-- add new hardware group -->
-New Hardware Group
-Name: <input type="text" id="add_hwg_name">
-<button id = "add_hwg" type="button">Add</button>
 
 <!-- list unassigned resources -->
 <h3>Unassigned Resources:</h3>
 
-<i>Soil Thermometers:</i>
-	<br>
-	{% for soil_thermometer in SoilThermometer.select().where(SoilThermometer.group == None) %}
-		{{ soil_thermometer.name }} - Address: {{ soil_thermometer.address }} Current reading: {{ soil_thermometer.curr_reading }}
+	<i>Soil Thermometers:</i>
+		<br>
+		{% for soil_thermometer in SoilThermometer.select().where(SoilThermometer.group == None) %}
+			{{ soil_thermometer.name }} - Address: {{ soil_thermometer.address }} Current reading: {{ soil_thermometer.curr_reading }}
 
-		<select>
-		{% for hw_group in HardwareGroup.select() %}
-  			<option id = "{{ hw_group.name }}"> {{ hw_group.name }} </option>
+			<!-- assign dropdown -->
+			<select id = "{{ soil_thermometer.id }}">
+			{% for hw_group in HardwareGroup.select() %}
+	  			<option value = "{{ hw_group.id }}"> {{ hw_group.name }} </option>
+			{% endfor %}
+
+			</select>
+			<button id = "ass_sth_{{ soil_thermometer.id }}" type="button">Assign</button>
+			<button id = "del_sth_{{ soil_thermometer.id }}" type="button">Delete</button>
+
+			<br>
 		{% endfor %}
 
-		</select>
-		<button id = "ass_sth_{{ soil_thermometer.id }}" type="button">Assign</button>
-		<button id = "del_sth_{{ soil_thermometer.id }}" type="button">Delete</button>
+		<br>
+
+		<i>Soil Hygrometers:</i>
+		<br>
+		{% for soil_hygrometer in SoilHygrometer.select().where(SoilHygrometer.group == None) %}
+			{{ soil_hygrometer.name }} - Port: {{ soil_hygrometer.port }} Device: {{ soil_hygrometer.device }} Channel: {{ soil_hygrometer.channel }} Current reading: {{ soil_hygrometer.curr_reading }}
+			<button id = "del_shy_{{ soil_hygrometer.id }}" type="button">Delete</button>
+			<br>
+		{% endfor %}
+
+
 
 		<br>
-	{% endfor %}
+
+		<i>Pumps:</i>
+		<br>
+		{% for pump in Pump.select().where(Pump.group == None) %}
+			{{ pump.name }} - GPIO pin: {{ pump.gpio_pin }} Current status: {{ pump.curr_state }}
+			<button id = "del_pmp_{{ pump.id }}" type="button">Delete</button>
+			<br>
+		{% endfor %}
+
+		<br>
+
+		<i>Fans:</i>
+		<br>
+		{% for fan in Fan.select().where(Fan.group == None) %}
+			{{ fan.name }} - GPIO pin: {{ fan.gpio_pin }} Current status: {{ fan.curr_state }}
+			<button id = "del_fan_{{ fan.id }}" type="button">Delete</button>
+			<br>
+		{% endfor %}
+
+<!-- add resources & groups -->
+<h3>Add Resources & Groups</h3>
+
+	<!-- add new hardware group -->
+	New Hardware Group
+	Name: <input type="text" id="add_hwg_name">
+	<button id = "add_hwg" type="button">Add</button>
+
+	<br>
 
 	<!-- add new soil therm -->
 	New Soil Thermometer 
@@ -91,14 +129,6 @@ Name: <input type="text" id="add_hwg_name">
 	<button id = "add_sth" type="button">Add</button>
 
 	<br>
-
-	<i>Soil Hygrometers:</i>
-	<br>
-	{% for soil_hygrometer in SoilHygrometer.select().where(SoilHygrometer.group == None) %}
-		{{ soil_hygrometer.name }} - Port: {{ soil_hygrometer.port }} Device: {{ soil_hygrometer.device }} Channel: {{ soil_hygrometer.channel }} Current reading: {{ soil_hygrometer.curr_reading }}
-		<button id = "del_shy_{{ soil_hygrometer.id }}" type="button">Delete</button>
-		<br>
-	{% endfor %}
 
 	<!-- add new soil hygro -->
 	New Soil Hygrometer 
@@ -110,14 +140,6 @@ Name: <input type="text" id="add_hwg_name">
 
 	<br>
 
-	<i>Pumps:</i>
-	<br>
-	{% for pump in Pump.select().where(Pump.group == None) %}
-		{{ pump.name }} - GPIO pin: {{ pump.gpio_pin }} Current status: {{ pump.curr_state }}
-		<button id = "del_pmp_{{ pump.id }}" type="button">Delete</button>
-		<br>
-	{% endfor %}
-
 	<!-- add new pump -->
 	New Pump 
 	Name: <input type="text" id="add_pmp_name">
@@ -126,13 +148,11 @@ Name: <input type="text" id="add_hwg_name">
 
 	<br>
 
-	<i>Fans:</i>
-	<br>
-	{% for fan in Fan.select().where(Pump.Group == None) %}
-		{{ fan.name }} - GPIO pin: {{ fan.gpio_pin }} Current status: {{ fan.curr_state }}
-		<button id = "del_fan_{{ fan.id }}" type="button">Delete</button>
-		<br>
-	{% endfor %}
+	<!-- add new fan -->
+	New Fan
+	Name: <input type="text" id="add_fan_name">
+	Pin: <input type="text" id="add_fan_pin">
+	<button id = "add_fan" type="button">Add</button>
 
 </body>
 
