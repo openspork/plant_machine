@@ -2,6 +2,7 @@ from flask import Flask, abort, render_template, url_for, redirect, send_file, r
 from app import app
 from hw_models import *
 import uuid
+from hardware import gpio_setup_out
 
 @app.route('/favicon.ico')
 def favicon():
@@ -11,6 +12,7 @@ def favicon():
 @app.route('/<op>/<model>/<id>', methods=['POST'])
 def update(op, model, id = None):
 	print op, model, id
+
 
 	#if we have an ID, select
 	if id:
@@ -30,13 +32,17 @@ def update(op, model, id = None):
 		if model == 'hwg':
 			instance = HardwareGroup.create(name = request.form['name'])
 		elif model == 'sth':
-			instance = SoilThermometer.create(name = request.form['name'], address = request.form['addr'])
+			instance = SoilThermometer.create(name = request.form['name'], address = request.form['addr'], pump_threshold = request.form['pmp_thresh'], fan_threshold = request.form['fan_thresh'])
 		elif model == 'shy':
-			Sinstance = SoilHygrometer.create(name = request.form['name'], port = request.form['port'], device = request.form['dev'], channel = request.form['chan'])
+			Sinstance = SoilHygrometer.create(name = request.form['name'], channel = request.form['chan'], pump_threshold = request.form['pmp_thresh'], fan_threshold = request.form['fan_thresh'])
 		elif model == 'pmp':
-			instance = Pump.create(name = request.form['name'], gpio_pin = request.form['pin'])
+			gpio_pin = request.form['pin']
+			instance = Pump.create(name = request.form['name'], gpio_pin = gpio_pin)
+			gpio_setup_out(gpio_pin)
 		elif model == 'fan':
-			instance = Fan.create(name = request.form['name'], gpio_pin = request.form['pin'])
+			gpio_pin = request.form['pin']
+			instance = Fan.create(name = request.form['name'], gpio_pin = gpio_pin)
+			gpio_setup_out(gpio_pin)
 
 	elif op == "ass":
 		instance.group = HardwareGroup.get(HardwareGroup.id == request.form['group'])

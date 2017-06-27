@@ -20,15 +20,17 @@ $(document).ready(function() {
            				case "sth": 
            					$.post (instr, { 
            						name: $('#add_sth_name').val(),
-           						addr: $('#add_sth_addr').val() 
+           						addr: $('#add_sth_addr').val(),
+                      pmp_thresh: $('#add_sth_pmp_thresh').val(),
+                      fan_thresh: $('#add_sth_fan_thresh').val()
            					})
            					break
            				case "shy":
            					$.post (instr, {
            						name: $('#add_shy_name').val(),
-           						port: $('#add_shy_port').val(), 
-           						dev: $('#add_shy_dev').val(),
-           						chan: $('#add_shy_chan').val()
+           						chan: $('#add_shy_chan').val(),
+                      pmp_thresh: $('#add_shy_pmp_thresh').val(),
+                      fan_thresh: $('#add_shy_fan_thresh').val()                      
            					})
            					break
            				case "pmp":

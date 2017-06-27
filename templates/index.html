@@ -18,7 +18,18 @@
 		<i>Soil Thermometers:</i>
 		<br>
 		{% for soil_thermometer in hw_group.soil_thermometers %}
-			{{ soil_thermometer.name }} - Address: {{ soil_thermometer.address }} Current reading: {{ soil_thermometer.curr_reading }}
+			Name:
+			{{ soil_thermometer.name }}
+			-
+			Address:
+			{{ soil_thermometer.address }} 
+			Current reading:
+			{{ soil_thermometer.curr_reading }}
+			Pump threshold:
+			{{ soil_thermometer.pump_threshold }}
+			Fan threshold:
+			{{ soil_thermometer.fan_threshold }}			
+
 			<button id = "rem_sth_{{ soil_thermometer.id }}" type="button">Remove</button>
 			<button id = "del_sth_{{ soil_thermometer.id }}" type="button">Delete</button>
 			<br>
@@ -29,7 +40,17 @@
 		<i>Soil Hygrometers:</i>
 		<br>
 		{% for soil_hygrometer in hw_group.soil_hygrometers %}
-			{{ soil_hygrometer.name }} - Port: {{ soil_hygrometer.port }} Device: {{ soil_hygrometer.device }} Channel: {{ soil_hygrometer.channel }} Current reading: {{ soil_hygrometer.curr_reading }}
+			Name:
+			{{ soil_hygrometer.name }}
+			-
+			Channel: {{ soil_hygrometer.channel }}
+			Current reading:
+			{{ soil_hygrometer.curr_reading }}
+			Pump threshold:
+			{{ soil_hygrometer.pump_threshold }}
+			Fan threshold:
+			{{ soil_hygrometer.fan_threshold }}
+
 			<button id = "rem_shy_{{ soil_hygrometer.id }}" type="button">Remove</button>
 			<button id = "del_shy_{{ soil_hygrometer.id }}" type="button">Delete</button>
 			<br>
@@ -39,20 +60,34 @@
 		<i>Pumps:</i>
 		<br>
 		{% for pump in hw_group.pumps %}
-			{{ pump.name }} - GPIO pin: {{ pump.gpio_pin }} Current status: {{ pump.curr_state }}
-			<br>
+			Name:
+			{{ pump.name }}
+			-
+			GPIO pin:
+			{{ pump.gpio_pin }}
+			Current status:
+			{{ pump.curr_state }}
+
 			<button id = "rem_pmp_{{ pump.id }}" type="button">Remove</button>
 			<button id = "del_pmp_{{ pump.id }}" type="button">Delete</button>
+			<br>
 		{% endfor %}
 		<br>
 
 		<i>Fans:</i>
 		<br>
 		{% for fan in hw_group.fans %}
-			{{ fan.name }} - GPIO pin: {{ fan.gpio_pin }} Current status: {{ fan.curr_state }}
-			<br>
+			Name:
+			{{ fan.name }}
+			-
+			GPIO pin:
+			{{ fan.gpio_pin }}
+			Current status:
+			{{ fan.curr_state }}
+			
 			<button id = "rem_fan_{{ fan.id }}" type="button">Remove</button>
 			<button id = "del_fan_{{ fan.id }}" type="button">Delete</button>
+			<br>
 		{% endfor %}
 
 	<br>
@@ -68,7 +103,7 @@
 	<i>Soil Thermometers:</i>
 		<br>
 		{% for soil_thermometer in SoilThermometer.select().where(SoilThermometer.group == None) %}
-			{{ soil_thermometer.name }} - Address: {{ soil_thermometer.address }} Current reading: {{ soil_thermometer.curr_reading }}
+			{{ soil_thermometer.name }} - Address: {{ soil_thermometer.address }} Current reading: {{ soil_thermometer.curr_reading }} Pump threshold: {{ soil_thermometer.pump_threshold }} Fan threshold: {{ soil_thermometer.fan_threshold }}
 
 			<!-- assign dropdown -->
 			<select id = "ass_sth_{{ soil_thermometer.id }}_group">
@@ -87,7 +122,7 @@
 		<i>Soil Hygrometers:</i>
 		<br>
 		{% for soil_hygrometer in SoilHygrometer.select().where(SoilHygrometer.group == None) %}
-			{{ soil_hygrometer.name }} - Port: {{ soil_hygrometer.port }} Device: {{ soil_hygrometer.device }} Channel: {{ soil_hygrometer.channel }} Current reading: {{ soil_hygrometer.curr_reading }}
+			{{ soil_hygrometer.name }} - Channel: {{ soil_hygrometer.channel }} Current reading: {{ soil_hygrometer.curr_reading }} Pump threshold: {{ soil_hygrometer.pump_threshold }} Fan threshold: {{ soil_hygrometer.fan_threshold }}
 
 			<!-- assign dropdown -->
 			<select id = "ass_shy_{{ soil_hygrometer.id }}_group">
@@ -153,6 +188,8 @@
 	New Soil Thermometer 
 	Name: <input type="text" id="add_sth_name">
 	Address: <input type="text" id="add_sth_addr">
+	Pump Threshold: <input type="text" id="add_sth_pmp_thresh">
+	Fan Threshold: <input type="text" id="add_sth_fan_thresh">
 	<button id = "add_sth" type="button">Add</button>
 
 	<br>
@@ -160,9 +197,9 @@
 	<!-- add new soil hygro -->
 	New Soil Hygrometer 
 	Name: <input type="text" id="add_shy_name"> 
-	Port: <input type="text" id="add_shy_port"> 
-	Device: <input type="text" id="add_shy_dev"> 
 	Channel: <input type="text" id="add_shy_chan">
+	Pump Threshold: <input type="text" id="add_shy_pmp_thresh">
+	Fan Threshold: <input type="text" id="add_shy_fan_thresh">
 	<button id = "add_shy" type="button">Add</button>
 
 	<br>
