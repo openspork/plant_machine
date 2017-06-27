@@ -7,6 +7,7 @@ poll_interval = 10
 
 def init_hw():
 	print 'hw init'
+	gpio_set_mode()
 	for pump in Pump.select():
 		gpio_setup_out(pump.gpio_pin)
 	for fan in Fan.select():
@@ -22,21 +23,21 @@ def check_therm():
 			print 'turning on pumps for group', soil_therm.group.name
 			for pump in soil_therm.group.pumps:
 				gpio_out(pump.gpio_pin, True)
-				print 'pump on', pump.name
+				print 'pump on:', pump.name
 		else:
 			for pump in soil_therm.group.pumps:
 				gpio_out(pump.gpio_pin, False)
-				print 'pump off', pump.name
+				print 'pump off:', pump.name
 
 		if temp > soil_therm.fan_threshold:
 			print 'turning on fans for group', soil_therm.group.name
 			for fan in soil_therm.group.fans:
 				gpio_out(fan.gpio_pin, True)
-				print 'fan on', fan.name
+				print 'fan on:', fan.name
 		else:
 			for fan in soil_therm.group.fans:
 				gpio_out(fan.gpio_pin, False)
-				print 'fan off', fan.name
+				print 'fan off:', fan.name
 
 def check_hygro():
 	for soil_hygro in SoilHygrometer.select().where(SoilHygrometer.group):

@@ -1,0 +1,88 @@
+<!-- list current hardware groups -->
+<h3>Current Hardware Groups:</h3>
+
+	{% for hw_group in HardwareGroup.select() %}
+		<b>{{ hw_group.name }}</b><button id =  "del_hwg_{{ hw_group.id }}" type="button">Delete</button>
+		<br>
+
+		<i>Soil Thermometers:</i>
+		<br>
+		{% for soil_thermometer in hw_group.soil_thermometers %}
+			Name:
+			{{ soil_thermometer.name }}
+			-
+			Address:
+			{{ soil_thermometer.address }} 
+			Current reading:
+			{{ soil_thermometer.curr_reading }}
+			Pump threshold:
+			{{ soil_thermometer.pump_threshold }}
+			Fan threshold:
+			{{ soil_thermometer.fan_threshold }}			
+
+			<button id = "rem_sth_{{ soil_thermometer.id }}" type="button">Remove</button>
+			<button id = "del_sth_{{ soil_thermometer.id }}" type="button">Delete</button>
+			<br>
+		{% endfor %}
+
+		<br>
+
+		<i>Soil Hygrometers:</i>
+		<br>
+		{% for soil_hygrometer in hw_group.soil_hygrometers %}
+			Name:
+			{{ soil_hygrometer.name }}
+			-
+			Channel: {{ soil_hygrometer.channel }}
+			Current reading:
+			{{ soil_hygrometer.curr_reading }}
+			Pump threshold:
+			{{ soil_hygrometer.pump_threshold }}
+			Fan threshold:
+			{{ soil_hygrometer.fan_threshold }}
+
+			<button id = "rem_shy_{{ soil_hygrometer.id }}" type="button">Remove</button>
+			<button id = "del_shy_{{ soil_hygrometer.id }}" type="button">Delete</button>
+			<br>
+		{% endfor %}
+		<br>
+
+		<i>Pumps:</i>
+		<br>
+		{% for pump in hw_group.pumps %}
+			Name:
+			{{ pump.name }}
+			-
+			GPIO pin:
+			{{ pump.gpio_pin }}
+			Current status:
+			{{ pump.curr_state }}
+
+			<button id = "rem_pmp_{{ pump.id }}" type="button">Remove</button>
+			<button id = "del_pmp_{{ pump.id }}" type="button">Delete</button>
+			<br>
+		{% endfor %}
+		<br>
+
+		<i>Fans:</i>
+		<br>
+		{% for fan in hw_group.fans %}
+			Name:
+			{{ fan.name }}
+			-
+			GPIO pin:
+			{{ fan.gpio_pin }}
+			Current status:
+			{{ fan.curr_state }}
+			
+			<button id = "rem_fan_{{ fan.id }}" type="button">Remove</button>
+			<button id = "del_fan_{{ fan.id }}" type="button">Delete</button>
+			<br>
+		{% endfor %}
+
+	<br>
+	<br>
+
+	{% endfor %}
+
+	<br>

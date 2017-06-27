@@ -2,15 +2,15 @@ import RPi.GPIO as GPIO
 import Adafruit_GPIO.SPI as SPI
 import Adafruit_MCP3008
 
-gpio_num_scheme = GPIO.BCM
-
 mcp1 = Adafruit_MCP3008.MCP3008(spi=SPI.SpiDev(0, 0))
 #below not implemented in hardware
 #mcp2 = Adafruit_MCP3008.MCP3008(spi=SPI.SpiDev(0, 1)) 
 
+def gpio_set_mode():
+	GPIO.setmode(GPIO.BCM)
+
 def gpio_setup_out(pin):
 	print 'setting gpio pin for output', pin
-	GPIO.setmode(gpio_num_scheme)
 	GPIO.setup(pin, GPIO.OUT)
 
 def gpio_out(pin, on):

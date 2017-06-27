@@ -2,7 +2,7 @@ from flask import Flask, abort, render_template, url_for, redirect, send_file, r
 from app import app
 from hw_models import *
 import uuid
-from hardware import gpio_setup_out
+from hardware import gpio_setup_out, gpio_out
 
 @app.route('/favicon.ico')
 def favicon():
@@ -12,7 +12,6 @@ def favicon():
 @app.route('/<op>/<model>/<id>', methods=['POST'])
 def update(op, model, id = None):
 	print op, model, id
-
 
 	#if we have an ID, select
 	if id:
@@ -36,18 +35,21 @@ def update(op, model, id = None):
 		elif model == 'shy':
 			Sinstance = SoilHygrometer.create(name = request.form['name'], channel = request.form['chan'], pump_threshold = request.form['pmp_thresh'], fan_threshold = request.form['fan_thresh'])
 		elif model == 'pmp':
-			gpio_pin = request.form['pin']
+			gpio_pin = int(request.form['pin'])
+			gpio_setup_out(gpio_pin)
 			instance = Pump.create(name = request.form['name'], gpio_pin = gpio_pin)
-			gpio_setup_out(gpio_pin)
+			
 		elif model == 'fan':
-			gpio_pin = request.form['pin']
-			instance = Fan.create(name = request.form['name'], gpio_pin = gpio_pin)
+			gpio_pin = int(request.form['pin'])
 			gpio_setup_out(gpio_pin)
+			instance = Fan.create(name = request.form['name'], gpio_pin = gpio_pin)
 
 	elif op == "ass":
 		instance.group = HardwareGroup.get(HardwareGroup.id == request.form['group'])
 
 	elif op == "del":
+		if model == 'pmp' or model == 'fan':
+			gpio_out(instance.gpio_pin, False)
 		instance.delete_instance()
 	elif op == "rem":
 		instance.group = None
@@ -61,7 +63,9 @@ def update(op, model, id = None):
 
 @app.route('/')
 def index():
-
 	return render_template('index.html', HardwareGroup = HardwareGroup, SoilThermometer = SoilThermometer, SoilHygrometer = SoilHygrometer, Pump = Pump, Fan = Fan)
 
 
+@app.route('/hw_groups')
+def hw_groups():
+	return render_template('hw_groups.html', HardwareGroup = HardwareGroup, SoilThermometer = SoilThermometer, SoilHygrometer = SoilHygrometer, Pump = Pump, Fan = Fan)
