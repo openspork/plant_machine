@@ -29,11 +29,16 @@ def update(op, model, id = None):
 	#handle operation:
 	if op == "add":
 		if model == 'hwg':
-			instance = HardwareGroup.create(name = request.form['name'])
+			instance = HardwareGroup.create(
+				name = request.form['name'],
+				pump_temp_threshold = request.form['pmp_temp_thresh'],
+				pump_moist_threshold = request.form['pmp_moist_thresh'],
+				fan_temp_threshold = request.form['fan_temp_thresh'],
+				fan_moist_threshold = request.form['fan_moist_thresh'])
 		elif model == 'sth':
-			instance = SoilThermometer.create(name = request.form['name'], address = request.form['addr'], pump_threshold = request.form['pmp_thresh'], fan_threshold = request.form['fan_thresh'])
+			instance = SoilThermometer.create(name = request.form['name'], address = request.form['addr'])
 		elif model == 'shy':
-			Sinstance = SoilHygrometer.create(name = request.form['name'], channel = request.form['chan'], pump_threshold = request.form['pmp_thresh'], fan_threshold = request.form['fan_thresh'])
+			Sinstance = SoilHygrometer.create(name = request.form['name'], channel = request.form['chan'])
 		elif model == 'pmp':
 			gpio_pin = int(request.form['pin'])
 			gpio_setup_out(gpio_pin)
@@ -48,10 +53,19 @@ def update(op, model, id = None):
 		instance.group = HardwareGroup.get(HardwareGroup.id == request.form['group'])
 
 	elif op == "del":
+		if model == 'hwg':
+			#TODO!
+			for pump in Pump.select().where(Pump.group == instance.id):
+				print 'removing pump', pump.name
+				pump.group = None
+
+			print 'TODO: delete all hardware group children'
 		if model == 'pmp' or model == 'fan':
 			gpio_out(instance.gpio_pin, False)
 		instance.delete_instance()
 	elif op == "rem":
+		if model == 'pmp' or model == 'fan':
+			gpio_out(instance.gpio_pin, False)
 		instance.group = None
 	else:
 		print "nothing"
@@ -63,9 +77,16 @@ def update(op, model, id = None):
 
 @app.route('/')
 def index():
-	return render_template('index.html', HardwareGroup = HardwareGroup, SoilThermometer = SoilThermometer, SoilHygrometer = SoilHygrometer, Pump = Pump, Fan = Fan)
-
+	return render_template('index.html')
 
 @app.route('/hw_groups')
 def hw_groups():
 	return render_template('hw_groups.html', HardwareGroup = HardwareGroup, SoilThermometer = SoilThermometer, SoilHygrometer = SoilHygrometer, Pump = Pump, Fan = Fan)
+
+@app.route('/unass_resources')
+def unass_resources():
+	return render_template('unass_resources.html', HardwareGroup = HardwareGroup, SoilThermometer = SoilThermometer, SoilHygrometer = SoilHygrometer, Pump = Pump, Fan = Fan)
+
+@app.route('/add_resources')
+def add_resources():
+	return render_template('add_resources.html', SoilThermometer = SoilThermometer, SoilHygrometer = SoilHygrometer, Pump = Pump, Fan = Fan)

@@ -9,19 +9,21 @@ class HardwareBase(Model):
 
 class HardwareGroup(HardwareBase):
 	name = CharField()
+	pump_temp_threshold = IntegerField()
+	pump_moist_threshold = IntegerField()
+	pump_status = BooleanField(null = True)
+	fan_temp_threshold = IntegerField()
+	fan_moist_threshold = IntegerField()
+	fan_status = BooleanField(null = True)
 
 class SoilThermometer(HardwareBase):
 	group = ForeignKeyField(HardwareGroup, related_name = 'soil_thermometers', null = True)
-	pump_threshold = IntegerField(null = True)
-	fan_threshold = IntegerField(null = True)
 	name = CharField()
 	address = CharField()
 	curr_reading = FloatField(null = True)
 
 class SoilHygrometer(HardwareBase):
 	group = ForeignKeyField(HardwareGroup, related_name = 'soil_hygrometers', null = True)
-	pump_threshold = IntegerField(null = True)
-	fan_threshold = IntegerField(null = True)
 	name = CharField()
 	channel = IntegerField()
 	curr_reading = FloatField(null = True)
@@ -30,11 +32,9 @@ class Pump(HardwareBase):
 	group = ForeignKeyField(HardwareGroup, related_name = 'pumps', null = True)
 	name = CharField()
 	gpio_pin = IntegerField()
-	curr_state = BooleanField(null = True)
 
 class Fan(HardwareBase):
 	group = ForeignKeyField(HardwareGroup, related_name = 'fans', null = True)
 	name = CharField()
 	gpio_pin = IntegerField()
-	curr_state = BooleanField(null = True)
 
