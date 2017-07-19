@@ -1,0 +1,13 @@
+div {
+	font-family: 'Helvetica', 'Arial', sans-serif;
+	color: MidnightBlue;
+	background-color: LightGreen;
+}
+
+.numinput {
+	width: 3em;
+}
+
+.textinput {
+	width: 6em;
+}

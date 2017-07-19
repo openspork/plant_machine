@@ -1,8 +1,9 @@
 from flask import Flask, abort, render_template, url_for, redirect, send_file, request
 from app import app
 from hw_models import *
-import uuid
-from hardware import gpio_setup_out, gpio_out
+from hardware import gpio_setup_out, gpio_out, get_temp
+from glob import glob
+from os.path import basename
 
 @app.route('/favicon.ico')
 def favicon():
@@ -38,7 +39,7 @@ def update(op, model, id = None):
 		elif model == 'sth':
 			instance = SoilThermometer.create(name = request.form['name'], address = request.form['addr'])
 		elif model == 'shy':
-			Sinstance = SoilHygrometer.create(name = request.form['name'], channel = request.form['chan'])
+			instance = SoilHygrometer.create(name = request.form['name'], channel = request.form['chan'])
 		elif model == 'pmp':
 			gpio_pin = int(request.form['pin'])
 			gpio_setup_out(gpio_pin)
@@ -55,11 +56,18 @@ def update(op, model, id = None):
 	elif op == "del":
 		if model == 'hwg':
 			#TODO!
+			for soil_therm in SoilThermometer.select().where(SoilThermometer.group == instance.id):
+				soil_therm.group = None
+				soil_therm.save()
+			for soil_hygro in SoilHygrometer.select().where(SoilHygrometer.group == instance.id):
+				soil_hygro.group = None
+				soil_hygro.save()						
 			for pump in Pump.select().where(Pump.group == instance.id):
-				print 'removing pump', pump.name
 				pump.group = None
-
-			print 'TODO: delete all hardware group children'
+				pump.save()
+			for fan in Fan.select().where(Fan.group == instance.id):
+				fan.group = None
+				fan.save()
 		if model == 'pmp' or model == 'fan':
 			gpio_out(instance.gpio_pin, False)
 		instance.delete_instance()
@@ -89,4 +97,11 @@ def unass_resources():
 
 @app.route('/add_resources')
 def add_resources():
-	return render_template('add_resources.html', SoilThermometer = SoilThermometer, SoilHygrometer = SoilHygrometer, Pump = Pump, Fan = Fan)
+	addresses = []
+	raw_addresses = glob('/sys/bus/w1/devices/28*')
+	for raw_address in raw_addresses:
+		address = basename(raw_address)
+		address_and_temp = (address, get_temp(address))
+		addresses.append(address_and_temp)
+
+	return render_template('add_resources.html', addresses = addresses)

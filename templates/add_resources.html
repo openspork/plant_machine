@@ -1,49 +1,67 @@
 <!-- add resources & groups -->
-<h3>Add Resources & Groups</h3>
+<h3>Add Groups and Resources</h3>
 
 	<!-- add new hardware group -->
-	<b>New Hardware Group Name:</b> <input type="text" id="add_hwg_name">
+	<b>New Hardware Group</b>
 	<br>
-	Pump Temp Threshold: <input type="text" id="add_hwg_pmp_temp_thresh">
+	Name: <input type="text" class="textinput" id="add_hwg_name">
 	<br>
-	Pump Moisture Threshold: <input type="text" id="add_hwg_pmp_moist_thresh">
+	Pump Temp Threshold: <input type="text" class="numinput" id="add_hwg_pmp_temp_thresh">
+	<br>
+	Pump Moisture Threshold: <input type="text" class="numinput" id="add_hwg_pmp_moist_thresh">
 	<br>
 
-	Fan Temp Threshold: <input type="text" id="add_hwg_fan_temp_thresh">
+	Fan Temp Threshold: <input type="text" class="numinput" id="add_hwg_fan_temp_thresh">
 	<br>
-	Fan Moisture Threshold: <input type="text" id="add_hwg_fan_moist_thresh">
+	Fan Moisture Threshold: <input type="text" class="numinput" id="add_hwg_fan_moist_thresh">
 	<br>
 	<button id = "add_hwg" type="button">Add</button>
 
 	<br>
 	<br>
-
 	<!-- add new soil therm -->
+	<b>New Hardware</b>
+	<br>
 	New Soil Thermometer 
-	Name: <input type="text" id="add_sth_name">
-	Address: <input type="text" id="add_sth_addr">
+	Name: <input type="text" class="textinput" id="add_sth_name">
+	Address: 
+	<select id="add_sth_addr">
+	{% for address in addresses %}
+		<option value='{{ address[0] }}'>{{ address[0] }}, curr temp: {{ address[1][1] }}</option>
+	{% endfor %}
+	</select>
 	<button id = "add_sth" type="button">Add</button>
 
 	<br>
 
 	<!-- add new soil hygro -->
 	New Soil Hygrometer 
-	Name: <input type="text" id="add_shy_name"> 
-	Channel: <input type="text" id="add_shy_chan">
+	Name: <input type="text" class="textinput" id="add_shy_name"> 
+	Channel:
+	<select id="add_shy_chan">
+		<option value='0'>0</option>
+		<option value='1'>1</option>
+		<option value='2'>2</option>
+		<option value='3'>3</option>
+		<option value='4'>4</option>
+		<option value='5'>5</option>
+		<option value='6'>6</option>
+		<option value='7'>7</option>
+	</select>
 	<button id = "add_shy" type="button">Add</button>
 
 	<br>
 
 	<!-- add new pump -->
 	New Pump 
-	Name: <input type="text" id="add_pmp_name">
-	Pin: <input type="text" id="add_pmp_pin">
-	<button id = "add_pmp" class = "update_hw_groups" type="button">Add</button>
+	Name: <input type="text" class="textinput" id="add_pmp_name">
+	Pin: <input type="text" class="numinput" id="add_pmp_pin">
+	<button id = "add_pmp" type="button">Add</button>
 
 	<br>
 
 	<!-- add new fan -->
 	New Fan
-	Name: <input type="text" id="add_fan_name">
-	Pin: <input type="text" id="add_fan_pin">
+	Name: <input type="text" class="textinput" id="add_fan_name">
+	Pin: <input type="text" class="numinput" id="add_fan_pin">
 	<button id = "add_fan" type="button">Add</button>

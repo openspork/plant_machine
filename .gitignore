@@ -1,6 +1,9 @@
 venv
-
 *.pyc
-
 *.db
-*.db
+*.DS_Store
+static/._jquery.spin.js
+static/._spin.js
+templates/._add_resources.html
+templates/._unass_resources.html
+static/._style.css
