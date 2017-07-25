@@ -32,9 +32,12 @@ class Pump(HardwareBase):
 	group = ForeignKeyField(HardwareGroup, related_name = 'pumps', null = True)
 	name = CharField()
 	gpio_pin = IntegerField()
+	run_time = IntegerField()
+	sleep_time = IntegerField()
 
 class Fan(HardwareBase):
 	group = ForeignKeyField(HardwareGroup, related_name = 'fans', null = True)
 	name = CharField()
 	gpio_pin = IntegerField()
-
+	run_time = IntegerField()
+	sleep_time = IntegerField()

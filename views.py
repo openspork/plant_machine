@@ -1,9 +1,11 @@
 from flask import Flask, abort, render_template, url_for, redirect, send_file, request
 from app import app
 from hw_models import *
-from hardware import gpio_setup_out, gpio_out, get_temp
+from hardware import get_temp
+from daemons import spawn_pump_daemon, kill_pump_daemon, spawn_fan_daemon, kill_fan_daemon
 from glob import glob
 from os.path import basename
+from datetime import timedelta
 
 @app.route('/favicon.ico')
 def favicon():
@@ -41,21 +43,20 @@ def update(op, model, id = None):
 		elif model == 'shy':
 			instance = SoilHygrometer.create(name = request.form['name'], channel = request.form['chan'])
 		elif model == 'pmp':
-			gpio_pin = int(request.form['pin'])
-			gpio_setup_out(gpio_pin)
-			instance = Pump.create(name = request.form['name'], gpio_pin = gpio_pin)
-			
+			instance = Pump.create(name = request.form['name'], gpio_pin = int(request.form['pin']), run_time = 1, sleep_time = 1)
 		elif model == 'fan':
-			gpio_pin = int(request.form['pin'])
-			gpio_setup_out(gpio_pin)
-			instance = Fan.create(name = request.form['name'], gpio_pin = gpio_pin)
+			instance = Fan.create(name = request.form['name'], gpio_pin = int(request.form['pin']), run_time = 1, sleep_time = 1)
 
 	elif op == "ass":
 		instance.group = HardwareGroup.get(HardwareGroup.id == request.form['group'])
+		if model == 'pmp':
+			spawn_pump_daemon(instance.id)
+		elif model == 'fan':
+			print 'spawn fan daemon placeholder'
+			spawn_fan_daemon(instance.id)
 
 	elif op == "del":
 		if model == 'hwg':
-			#TODO!
 			for soil_therm in SoilThermometer.select().where(SoilThermometer.group == instance.id):
 				soil_therm.group = None
 				soil_therm.save()
@@ -63,25 +64,34 @@ def update(op, model, id = None):
 				soil_hygro.group = None
 				soil_hygro.save()						
 			for pump in Pump.select().where(Pump.group == instance.id):
+				kill_pump_daemon(pump.id)
 				pump.group = None
 				pump.save()
 			for fan in Fan.select().where(Fan.group == instance.id):
+				kill_fan_daemon(fan.id)
 				fan.group = None
 				fan.save()
-		if model == 'pmp' or model == 'fan':
-			gpio_out(instance.gpio_pin, False)
+		elif model == 'pmp':
+			#if pump is active, kill daemon
+			if instance.group:
+				kill_pump_daemon(instance.id)
+		elif model == 'fan':
+			#if fan is active, kill daemon
+			if instance.group:
+				kill_fan_daemon(instance.id)
 		instance.delete_instance()
 	elif op == "rem":
-		if model == 'pmp' or model == 'fan':
-			gpio_out(instance.gpio_pin, False)
+		if model == 'pmp':
+			kill_pump_daemon(instance.id)
+			instance.group.pump_status = False
+		elif model == 'fan':
+			kill_fan_daemon(instance.id)
+			instance.group.fan_status = False
 		instance.group = None
-	else:
-		print "nothing"
 		
 	instance.save()
 
 	return redirect(url_for('index'))
-
 
 @app.route('/')
 def index():

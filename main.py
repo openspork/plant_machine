@@ -2,7 +2,7 @@ from app import app
 from hw_models import hw_db
 from views  import *
 import atexit
-from daemons import start_monitor, start_poller
+from daemons import start_sensor_monitor, start_sensor_poller
 from hardware import cleanup_hw
 
 #connects to DB and init tables if not present
@@ -20,8 +20,8 @@ def init():
 	atexit.register(term) #register exit handler to close db on exit
 	init_db() #open db
 
-	start_poller()
-	start_monitor()
+	start_sensor_poller()
+	start_sensor_monitor()
 
 if __name__ == '__main__':
 	init()

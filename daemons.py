@@ -1,22 +1,20 @@
 from hw_models import *
 from hardware import *
-from threading import Thread
-import time
+from triggers import check_triggers
+from threading import Thread, Event
+from time import sleep
+from datetime import timedelta
 
-poll_interval = 5
-monitor_interval = 15
+poll_sensor_interval = 5
+monitor_sensor_interval = 10
+monitor_action_interval = 2
 
-def init_hw():
-	print 'hw init'
-	for group in HardwareGroup.select():
-		group.pump_status = False
-		group.fan_status = False
+pump_daemons = {}
+fan_daemons = {}
 
-	gpio_set_mode()
-	for pump in Pump.select():
-		gpio_setup_out(pump.gpio_pin)
-	for fan in Fan.select():
-		gpio_setup_out(fan.gpio_pin)
+#################################################################
+#					Poll Sensors for Data
+#################################################################
 
 def check_therm():
 	for soil_therm in SoilThermometer.select():
@@ -28,130 +26,137 @@ def check_hygro():
 		soil_hygro.curr_reading = get_moisture(soil_hygro.channel)
 		soil_hygro.save()
 
-def poller():
+def sensor_poller():
 	while True:
 		check_therm()
 		check_hygro()
-		time.sleep(poll_interval)	
+		sleep(poll_sensor_interval)	
 
-def start_poller():
-	thread = Thread(target = poller, name = 'poller')
-	thread.setDaemon(True)
-	thread.start()
+def start_sensor_poller():
+	sensor_poller_daemon = Thread(target = sensor_poller, name = 'sensor_poller')
+	sensor_poller_daemon.setDaemon(True)
+	sensor_poller_daemon.start()
 
-def check_triggers():
-	print '\nchecking triggers:\n'
-	for group in HardwareGroup.select():
-		print '    processing group', group.name
-		#handle therm sensors
-		for soil_therm in group.soil_thermometers.select():
-			#handle pumps
-			print '        processing therm', soil_therm.name, ': curr reading: ', soil_therm.curr_reading, 'pump thresh: ', group.pump_temp_threshold
-			if (soil_therm.curr_reading > group.pump_temp_threshold):
-				print '        therm past pump threshold'
-				if not group.pump_status:
-					print '        not yet pumping'
-					for pump in group.pumps:
-						print '            starting pumping\n'
-						gpio_out(pump.gpio_pin, True)
-						group.pump_status = True
-						group.save()
-				else:
-					print '            pumps already started\n'
-			elif (soil_therm.curr_reading <= group.pump_temp_threshold):
-				print '        therm below threshold'
-				if group.pump_status:
-					print '        still pumping'
-					for pump in group.pumps:
-						print '            stopping pumping\n'
-						gpio_out(pump.gpio_pin, False)
-						group.pump_status = False
-						group.save()
-				else:
-					print '            pumps already stopped\n'
-			#handle fans
-			print '        processing therm', soil_therm.name, ': curr reading: ', soil_therm.curr_reading, 'fan thresh: ', group.fan_temp_threshold
-			if (soil_therm.curr_reading > group.fan_temp_threshold):
-				print '        therm past fan threshold'
-				if not group.fan_status:
-					print '        not yet fanning'
-					for fan in group.fans:
-						print '            starting fanning\n'
-						gpio_out(fan.gpio_pin, True)
-						group.fan_status = True
-						group.save()
-				else:
-					print '            fans already started\n'
-			elif (soil_therm.curr_reading <= group.fan_temp_threshold):
-				print '        therm below threshold'
-				if group.fan_status:
-					print '        still fanning'
-					for fan in group.fans:
-						print '            stopping fanning\n'
-						gpio_out(fan.gpio_pin, False)
-						group.fan_status = False
-						group.save()
-				else:
-					print '            fans already stopped\n'
+#################################################################
+#					Monitor Polled Sensor Data
+#################################################################
 
-		#handle moisture sensors
-		for soil_hygro in group.soil_hygrometers.select():
-			#handle pumps
-			print '        processing hygro', soil_hygro.name, ': curr reading: ', soil_hygro.curr_reading, 'pump thresh: ', group.pump_temp_threshold
-			if (soil_hygro.curr_reading > group.pump_temp_threshold):
-				print '        hygro past pump threshold'
-				if not group.pump_status:
-					print '        not yet pumping'
-					for pump in group.pumps:
-						print '            starting pumping\n'
-						gpio_out(pump.gpio_pin, True)
-						group.pump_status = True
-						group.save()
-				else:
-					print '            pumps already started\n'
-			elif (soil_hygro.curr_reading <= group.pump_temp_threshold):
-				print '        hygro below threshold'
-				if group.pump_status:
-					print '        still pumping'
-					for pump in group.pumps:
-						print '            stopping pumping\n'
-						gpio_out(pump.gpio_pin, False)
-						group.pump_status = False
-						group.save()
-				else:
-					print '            pumps already stopped\n'
-			#handle fans
-			print '        processing hygro', soil_hygro.name, ': curr reading: ', soil_hygro.curr_reading, 'fan thresh: ', group.fan_temp_threshold
-			if (soil_hygro.curr_reading > group.fan_temp_threshold):
-				print '        hygro past fan threshold'
-				if not group.fan_status:
-					print '        not yet fanning'
-					for fan in group.fans:
-						print '            starting fanning\n'
-						gpio_out(fan.gpio_pin, True)
-						group.fan_status = True
-						group.save()
-				else:
-					print '            fans already started\n'
-			elif (soil_hygro.curr_reading <= group.fan_temp_threshold):
-				print '        hygro below threshold'
-				if group.fan_status:
-					print '        still fanning'
-					for fan in group.fans:
-						print '            stopping fanning\n'
-						gpio_out(fan.gpio_pin, False)
-						group.fan_status = False
-						group.save()
-				else:
-					print '            fans already stopped\n'
-
-def monitor():
+def sensor_monitor():
 	while True:
-		check_triggers()
-		time.sleep(monitor_interval)
+		for group in HardwareGroup.select():
+			check_triggers(group.id)
+		sleep(monitor_sensor_interval)
 
-def start_monitor():
+def start_sensor_monitor():
 	init_hw()
-	thread = Thread(target = monitor, name = 'monitor')
-	thread.setDaemon(True)
-	thread.start()
+	sensor_monitor_daemon = Thread(target = sensor_monitor, name = 'sensor_monitor')
+	sensor_monitor_daemon.setDaemon(True)
+	sensor_monitor_daemon.start()
+
+#################################################################
+#					Monitor Pumps for Action
+#################################################################
+
+def pump_monitor(pump_id, stop_event):
+	while not stop_event.is_set():
+		pump = Pump.get(Pump.id == pump_id)
+		group = pump.group
+		#print '            pump daemon running for:', pump.name, 'group:', group.name, 'status:', group.pump_status
+		#while the pump's group is pumping
+		if pump.group.pump_status:
+			#pump for the run time
+			gpio_out(pump.gpio_pin, True)
+			sleep(pump.run_time)
+			#stop for the sleep time
+			gpio_out(pump.gpio_pin, False)
+			sleep(pump.sleep_time)
+		#wait to recheck the group's pumping status
+		else:
+			sleep(monitor_action_interval)
+	print '            pump daemon ending for:', pump.name
+	#turn off pin before end
+	gpio_out(pump.gpio_pin, False)
+
+def spawn_pump_daemon(pump_id):
+	pump = Pump.get(Pump.id == pump_id)
+	print '        spawning daemon for ', pump.name
+	gpio_setup_out(pump.gpio_pin)
+	kill_pump_monitor_daemon_event = Event()
+	pump_monitor_daemon = Thread(target = pump_monitor, name = pump.name + '_monitor', args = (pump.id, kill_pump_monitor_daemon_event))
+	pump_monitor_daemon.setDaemon(True)
+	pump_monitor_daemon.start()
+	pump_daemons[pump.id] = kill_pump_monitor_daemon_event
+
+def kill_pump_daemon(pump_id):
+	pump = Pump.get(Pump.id == pump_id)
+	print 'killing daemon for ', pump.name
+	pump_daemons[pump.id].set()
+
+#################################################################
+#					Monitor Fans for Action
+#################################################################
+
+def fan_monitor(fan_id, stop_event):
+	while not stop_event.is_set():
+		fan = Fan.get(Fan.id == fan_id)
+		group = fan.group
+		#print '            fan daemon running for:', fan.name, 'group:', group.name, 'status:', group.fan_status
+		#while the fan's group is fanning
+		if fan.group.fan_status:
+			#fan for the run time
+			gpio_out(fan.gpio_pin, True)
+			sleep(fan.run_time)
+			#stop for the sleep time
+			gpio_out(fan.gpio_pin, False)
+			sleep(fan.sleep_time)
+		#wait to recheck the group's fanning status
+		else:
+			sleep(monitor_action_interval)
+	print '            fan daemon ending for:', fan.name
+	#turn off pin before end
+	gpio_out(fan.gpio_pin, False)
+
+def spawn_fan_daemon(fan_id):
+	fan = Fan.get(Fan.id == fan_id)
+	print '        spawning daemon for ', fan.name
+	gpio_setup_out(fan.gpio_pin)
+	kill_fan_monitor_daemon_event = Event()
+	fan_monitor_daemon = Thread(target = fan_monitor, name = fan.name + '_monitor', args = (fan.id, kill_fan_monitor_daemon_event))
+	fan_monitor_daemon.setDaemon(True)
+	fan_monitor_daemon.start()
+	fan_daemons[fan.id] = kill_fan_monitor_daemon_event
+
+def kill_fan_daemon(fan_id):
+	fan = Fan.get(Fan.id == fan_id)
+	print 'killing daemon for ', fan.name
+	fan_daemons[fan.id].set()
+
+#################################################################
+#					Init HW for Daemons
+#################################################################
+def init_hw():
+	print 'hw init'
+	gpio_set_mode()
+	for group in HardwareGroup.select():
+		group.pump_status = False
+		group.fan_status = False
+
+	for pump in Pump.select().where(Pump.group != None):
+		spawn_pump_daemon(pump.id)
+	for fan in Fan.select().where(Fan.group != None):
+		spawn_fan_daemon(fan.id)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

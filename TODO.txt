@@ -1,1 +1,4 @@
-implement pump / fan schedules
+to complete:
+
+cleanup exceptions thrown by daemons on dev rem / del
+

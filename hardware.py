@@ -7,21 +7,21 @@ mcp1 = Adafruit_MCP3008.MCP3008(spi=SPI.SpiDev(0, 0))
 #mcp2 = Adafruit_MCP3008.MCP3008(spi=SPI.SpiDev(0, 1)) 
 
 def gpio_set_mode():
-	print 'setting GPIO mode'
+	#print 'setting GPIO mode'
 	GPIO.setmode(GPIO.BCM)
 
 def gpio_setup_out(pin):
-	print 'setting gpio pin for output', pin
+	#print 'setting gpio pin for output', pin
 	GPIO.setup(pin, GPIO.OUT)
 	GPIO.output(pin, GPIO.LOW)
 
 def gpio_out(pin, on):
 	if on:
 		GPIO.output(pin, GPIO.HIGH)
-		print '*** gpio pin high ***', pin
+		#print '*** gpio pin high ***', pin
 	else:
 		GPIO.output(pin, GPIO.LOW)
-		print '*** gpio pin low ***', pin
+		#print '*** gpio pin low ***', pin
 
 def get_temp(address):
 	file = open('/sys/bus/w1/devices/' + address + '/w1_slave', 'r')
@@ -42,11 +42,8 @@ def get_moisture(channel):
 	return mcp1.read_adc(channel)
 
 def cleanup_hw():
-	print 'cleaning up hw'
+	print 'cleaning up hw!'
 	GPIO.cleanup()
 
-if __name__ == '__main__':
-	print 'running as main, testing'
-	print get_temp('28-0000071d1378')
-	print get_moisture(0)
+
 

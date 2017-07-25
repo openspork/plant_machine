@@ -7,3 +7,5 @@ static/._spin.js
 templates/._add_resources.html
 templates/._unass_resources.html
 static/._style.css
+._daemons.py
+templates/._unass_resources.html
