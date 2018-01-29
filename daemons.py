@@ -1,7 +1,7 @@
 from hw_models import *
 from hardware import *
 from triggers import check_triggers
-from threading import Thread, Event
+from threading import Thread, Event, Timer
 from time import sleep
 from datetime import timedelta
 
@@ -11,6 +11,7 @@ monitor_action_interval = 2
 
 pump_daemons = {}
 fan_daemons = {}
+light_daemons = {}
 
 #################################################################
 #					Poll Sensors for Data
@@ -130,6 +131,19 @@ def kill_fan_daemon(fan_id):
 	fan = Fan.get(Fan.id == fan_id)
 	print 'killing daemon for ', fan.name
 	fan_daemons[fan.id].set()
+
+#################################################################
+#					Monitor Lights for Action
+#################################################################
+def light_monitor(light_id, stop_event):
+	print 'monitoring light'
+
+def spawn_fan_daemon(light_id):
+	print 'spawning light daemon'
+
+def kill_fan_daemon(light_id):
+	print 'killing light daemon'
+
 
 #################################################################
 #					Init HW for Daemons

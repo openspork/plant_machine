@@ -74,3 +74,20 @@
 			<button id = "del_fan_{{ fan.id }}" type="button">Delete</button>
 			<br>
 		{% endfor %}
+
+		<i>Lights:</i>
+		<br>
+		{% for light in lights %}
+			{{ light.name }} - GPIO pin: {{ light.gpio_pin }}
+
+			<!-- assign dropdown -->
+			<select id = "ass_lgt_{{ light.id }}_group">
+			{% for hw_group in HardwareGroup.select() %}
+	  			<option value = "{{ hw_group.id }}"> {{ hw_group.name }} </option>
+			{% endfor %}
+			</select>
+
+			<button id = "ass_lgt_{{ light.id }}" type="button">Assign</button>
+			<button id = "del_lgt_{{ light.id }}" type="button">Delete</button>
+			<br>
+		{% endfor %}

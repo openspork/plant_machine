@@ -9,7 +9,7 @@ from hardware import cleanup_hw
 def init_db():
 	hw_db.connect() #connect to db
 	print 'opened hw db!'
-	hw_db.create_tables([HardwareGroup, SoilHygrometer, SoilThermometer, Pump, Fan], safe = True) #create tables if not present
+	hw_db.create_tables([HardwareGroup, SoilHygrometer, SoilThermometer, Pump, Fan, Light], safe = True) #create tables if not present
 	
 def term():
 	hw_db.close()

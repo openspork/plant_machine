@@ -9,11 +9,17 @@ class HardwareBase(Model):
 
 class HardwareGroup(HardwareBase):
 	name = CharField()
+
 	pump_temp_threshold = IntegerField()
 	pump_moist_threshold = IntegerField()
 	pump_status = BooleanField(null = True)
+
 	fan_temp_threshold = IntegerField()
 	fan_moist_threshold = IntegerField()
+	fan_status = BooleanField(null = True)
+
+	light_start_time = TimeField()
+	light_stop_time = TimeField()
 	fan_status = BooleanField(null = True)
 
 class SoilThermometer(HardwareBase):
@@ -41,3 +47,9 @@ class Fan(HardwareBase):
 	gpio_pin = IntegerField()
 	run_time = IntegerField()
 	sleep_time = IntegerField()
+
+class Light(HardwareBase):
+	group = ForeignKeyField(HardwareGroup, related_name = 'lights', null = True)
+	name = CharField()
+	gpio_pin = IntegerField()
+
