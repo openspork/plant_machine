@@ -2,7 +2,7 @@ from flask import Flask, abort, render_template, url_for, redirect, send_file, r
 from app import app
 from hw_models import *
 from hardware import get_temp
-from daemons import spawn_pump_daemon, kill_pump_daemon, spawn_fan_daemon, kill_fan_daemon
+from daemons import spawn_pump_daemon, kill_pump_daemon, spawn_fan_daemon, kill_fan_daemon, spawn_light_daemon, kill_light_daemon
 from glob import glob
 from os.path import basename
 from datetime import timedelta
@@ -62,8 +62,10 @@ def update(op, model, id = None):
 			spawn_pump_daemon(instance.id)
 		elif model == 'fan':
 			spawn_fan_daemon(instance.id)
-		elif model == 'fan':
-			spawn_light_daemon(instance.id)
+		elif model == 'lgt':
+			instance.save()
+			spawn_light_daemon(instance)
+
 
 	elif op == "del":
 		if model == 'hwg':
@@ -81,6 +83,10 @@ def update(op, model, id = None):
 				kill_fan_daemon(fan.id)
 				fan.group = None
 				fan.save()
+			for light in Light.select().where(Light.group == instance.id):
+				kill_light_daemon(light.id)
+				light.group = None
+				light.save()
 		elif model == 'pmp':
 			#if pump is active, kill daemon
 			if instance.group:
@@ -97,6 +103,9 @@ def update(op, model, id = None):
 		elif model == 'fan':
 			kill_fan_daemon(instance.id)
 			instance.group.fan_status = False
+		elif model == 'lgt':
+			kill_light_daemon(instance)
+			instance.group.lgt_status = False
 		instance.group = None
 		
 	instance.save()

@@ -73,7 +73,7 @@ $(document).on("click", "button", function(){
         case "lgt":
             $.post (instr, { 
             name: $('#add_lgt_name').val(),
-            pin: $('#add_lgt_pin').val() 
+            pin: $('#add_lgt_pin').val()
           }, function(data){
             reloadElements()
           });

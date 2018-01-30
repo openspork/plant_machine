@@ -1,9 +1,11 @@
 from hw_models import *
 from hardware import *
 from triggers import check_triggers
-from threading import Thread, Event, Timer
+from threading import Thread, Event, Timer, current_thread
 from time import sleep
 from datetime import timedelta
+import schedule
+import functools
 
 poll_sensor_interval = 5
 monitor_sensor_interval = 10
@@ -11,7 +13,83 @@ monitor_action_interval = 2
 
 pump_daemons = {}
 fan_daemons = {}
-light_daemons = {}
+
+light_jobs = {}
+kill_schedule_daemon_event = Event()
+
+#################################################################
+#					Scheduling
+#################################################################
+
+#catch errors
+def catch_exceptions(job_func, cancel_on_failure=False):
+    @functools.wraps(job_func)
+    def wrapper(*args, **kwargs):
+        try:
+            return job_func(*args, **kwargs)
+        except:
+            import traceback
+            print(traceback.format_exc())
+            if cancel_on_failure:
+                return schedule.CancelJob
+    return wrapper
+
+#job threader
+def schedule_threaded(job_func):
+    job_thread = threading.Thread(target=job_func)
+    job_thread.start()
+
+#check the schedule
+def schedule_daemon(stop_event):
+	while not stop_event.is_set():
+		schedule.run_pending()
+		sleep(1)
+	print '            schdule daemon ending for'
+
+#start the scheduler
+def spawn_schedule_daemon():
+	print 'starting job scheduler'
+	daemon = Thread(target = schedule_daemon, name = 'job scheduler', args = (kill_schedule_daemon_event,))
+	daemon.setDaemon(True)
+	daemon.start()
+
+#kill the scheduler
+def kill_schedule_daemon():
+	print 'killing scheduler'
+	kill_schedule_daemon_event.set()
+
+#################################################################
+#					Schedule Lights
+#################################################################
+
+@catch_exceptions()
+def lights_on(light):
+	print '!!!!!!!!! turning', light.name, 'on'
+	gpio_out(light.gpio_pin, True)
+
+@catch_exceptions()
+def lights_off(light):
+	print '!!!!!!!!! turning', light.name, 'off'
+	gpio_out(light.gpio_pin, False)
+
+def spawn_light_daemon(light):
+	print '        scheduling light: ', light.name
+	# start_job = schedule.every().day.at(Light.group.light_start_time).do(lights_on, light)
+	# stop_job = schedule.every().day.at(Light.group.light_off_time).do(lights_off, light)
+	start_job = schedule.every(2).seconds.do(lights_on, light)
+	stop_job = schedule.every(3).seconds.do(lights_off, light)
+
+	#store the jobs in dict as a tuple
+	light_jobs[light.id] = (start_job, stop_job)
+
+	#prepare the job
+	gpio_setup_out(light.gpio_pin)
+
+def kill_light_daemon(light):
+	print '        unscheduling light: ', light.name
+	for job in light_jobs[light.id]:
+		schedule.cancel_job(job)
+	light_jobs.pop(light.id)
 
 #################################################################
 #					Poll Sensors for Data
@@ -131,19 +209,6 @@ def kill_fan_daemon(fan_id):
 	fan = Fan.get(Fan.id == fan_id)
 	print 'killing daemon for ', fan.name
 	fan_daemons[fan.id].set()
-
-#################################################################
-#					Monitor Lights for Action
-#################################################################
-def light_monitor(light_id, stop_event):
-	print 'monitoring light'
-
-def spawn_fan_daemon(light_id):
-	print 'spawning light daemon'
-
-def kill_fan_daemon(light_id):
-	print 'killing light daemon'
-
 
 #################################################################
 #					Init HW for Daemons

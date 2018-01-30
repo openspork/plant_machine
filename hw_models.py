@@ -2,7 +2,6 @@ from peewee import *
 from app import hw_db
 #from hardware import *
 
-
 class HardwareBase(Model):
 	class Meta:
 		database = hw_db
