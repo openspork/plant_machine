@@ -65,14 +65,12 @@ def kill_schedule_daemon():
 
 #@catch_exceptions(cancel_on_failure=False)
 def lights_on(light):
-	print '!!!!!!!!! turning', light.name, 'on'
 	gpio_out(light.gpio_pin, True)
 	light.group.light_status = True
 	light.group.save()
 
 #@catch_exceptions(cancel_on_failure=False)
 def lights_off(light):
-	print '!!!!!!!!! turning', light.name, 'off'
 	gpio_out(light.gpio_pin, False)
 	light.group.light_status = False
 	light.group.save()
@@ -107,6 +105,10 @@ def kill_light_daemon(light):
 	for job in jobs:
 		schedule.cancel_job(job)
 	light_jobs.pop(light.id)
+	#clear light status if no more lights
+	if Light.select().where(Light.group == light.group).count() == 1:
+		light.group.light_status = None
+		light.group.save()
 
 #################################################################
 #					Poll Sensors for Data
@@ -235,11 +237,13 @@ def init_hw():
 	for group in HardwareGroup.select():
 		group.pump_status = False
 		group.fan_status = False
-
+		
 	for pump in Pump.select().where(Pump.group != None):
 		spawn_pump_daemon(pump.id)
 	for fan in Fan.select().where(Fan.group != None):
 		spawn_fan_daemon(fan.id)
+	for light in Light.select().where(Light.group != None):
+		spawn_light_daemon(light, light.group)
 
 
 

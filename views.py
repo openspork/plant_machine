@@ -89,7 +89,7 @@ def update(op, model, id = None):
 		elif model == 'lgt':
 			kill_light_daemon(instance)
 		instance.group = None
-		
+
 	instance.save()
 	return redirect(url_for('index'))
 
