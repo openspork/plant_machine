@@ -8,7 +8,7 @@ def check_soil_thermometers(group):
 		#handle pumps
 		print '        PUMP MONITOR: processing THERM:"', soil_therm.name, '" curr reading:', soil_therm.curr_reading, 'pump thresh:', group.pump_temp_threshold
 		if (soil_therm.curr_reading > group.pump_temp_threshold):
-			print '        therm past pump threshold'
+			#print '        therm past pump threshold'
 			pump_triggered = True
 		#handle fans
 		print '        FAN MONITOR: processing THERM:"', soil_therm.name, '" curr reading:', soil_therm.curr_reading, 'fan thresh:', group.fan_temp_threshold
