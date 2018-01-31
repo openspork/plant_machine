@@ -1,7 +1,6 @@
 from hw_models import *
 
-def check_soil_thermometers(group_id):
-	group = HardwareGroup.get(HardwareGroup.id == group_id)
+def check_soil_thermometers(group):
 	pump_triggered = False
 	fan_triggered = False
 	#handle therm sensors
@@ -9,7 +8,7 @@ def check_soil_thermometers(group_id):
 		#handle pumps
 		print '        PUMP MONITOR: processing THERM:"', soil_therm.name, '" curr reading:', soil_therm.curr_reading, 'pump thresh:', group.pump_temp_threshold
 		if (soil_therm.curr_reading > group.pump_temp_threshold):
-			#print '        therm past pump threshold'
+			print '        therm past pump threshold'
 			pump_triggered = True
 		#handle fans
 		print '        FAN MONITOR: processing THERM:"', soil_therm.name, '" curr reading:', soil_therm.curr_reading, 'fan thresh:', group.fan_temp_threshold
@@ -19,9 +18,7 @@ def check_soil_thermometers(group_id):
 	return pump_triggered, fan_triggered
 
 
-def check_soil_hygrometers(group_id):
-	group = HardwareGroup.get(HardwareGroup.id == group_id)
-
+def check_soil_hygrometers(group):
 	pump_triggered = False
 	fan_triggered = False
 	#handle moisture sensors
@@ -38,8 +35,7 @@ def check_soil_hygrometers(group_id):
 			fan_triggered = True
 	return pump_triggered, fan_triggered
 
-def check_triggers(group_id):
-	group = HardwareGroup.get(HardwareGroup.id == group_id)
+def check_triggers(group):
 	#print '\n\n        checking triggers for:', group.name, '\n'
 	
 	therm_trigger_results = check_soil_thermometers(group)

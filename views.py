@@ -46,16 +46,16 @@ def update(op, model, id = None):
 		elif model == 'shy':
 			instance = SoilHygrometer.create(name = request.form['name'], channel = request.form['chan'])
 		elif model == 'pmp':
-			instance = Pump.create(name = request.form['name'], gpio_pin = int(request.form['pin']), run_time = 1, sleep_time = 1)
+			instance = Pump.create(name = request.form['name'], gpio_pin = int(request.form['pin']), run_time = 50)
 		elif model == 'fan':
-			instance = Fan.create(name = request.form['name'], gpio_pin = int(request.form['pin']), run_time = 1, sleep_time = 1)
+			instance = Fan.create(name = request.form['name'], gpio_pin = int(request.form['pin']), run_time = 50)
 		elif model == 'lgt':
-			instance = Light.create(name = request.form['name'], gpio_pin = int(request.form['pin']), run_time = 1, sleep_time = 1)
+			instance = Light.create(name = request.form['name'], gpio_pin = int(request.form['pin']))
 
 	elif op == "ass":
 		instance.group = HardwareGroup.get(HardwareGroup.id == request.form['group'])
 		if model == 'pmp':
-			spawn_pump_daemon(instance.id)
+			spawn_pump_daemon(instance)
 		elif model == 'fan':
 			spawn_fan_daemon(instance.id)
 		elif model == 'lgt':
@@ -83,7 +83,7 @@ def update(op, model, id = None):
 
 	elif op == "rem":
 		if model == 'pmp':
-			kill_pump_daemon(instance.id)
+			kill_pump_daemon(instance)
 		elif model == 'fan':
 			kill_fan_daemon(instance.id)
 		elif model == 'lgt':

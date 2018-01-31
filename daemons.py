@@ -4,60 +4,36 @@ from triggers import check_triggers
 from threading import Thread, Event, Timer, current_thread
 from time import sleep
 from datetime import datetime, timedelta
-import schedule
-import functools
 from utils.utils import time_in_range
+from scheduler.scheduler import schedule
 
+#frequency at which sensors are updated
 poll_sensor_interval = 5
-monitor_sensor_interval = 10
-monitor_action_interval = 2
 
-pump_daemons = {}
+#frequency at which pump / fan daemons check instructions
+monitor_action_interval = 10
+
+pump_jobs = {}
 fan_daemons = {}
 
 light_jobs = {}
-kill_schedule_daemon_event = Event()
 
 #################################################################
-#					Scheduling
+#					Init HW for Daemons
 #################################################################
-
-#catch errors
-def catch_exceptions(job_func, cancel_on_failure=False):
-    @functools.wraps(job_func)
-    def wrapper(*args, **kwargs):
-        try:
-            return job_func(*args, **kwargs)
-        except:
-            import traceback
-            print(traceback.format_exc())
-            if cancel_on_failure:
-                return schedule.CancelJob
-    return wrapper
-
-#job threader
-def schedule_threaded(job_func):
-    job_thread = threading.Thread(target=job_func)
-    job_thread.start()
-
-#check the schedule
-def schedule_daemon(stop_event):
-	while not stop_event.is_set():
-		schedule.run_pending()
-		sleep(1)
-	print '            schdule daemon ending for'
-
-#start the scheduler
-def spawn_schedule_daemon():
-	print 'starting job scheduler'
-	daemon = Thread(target = schedule_daemon, name = 'job scheduler', args = (kill_schedule_daemon_event,))
-	daemon.setDaemon(True)
-	daemon.start()
-
-#kill the scheduler
-def kill_schedule_daemon():
-	print 'killing scheduler'
-	kill_schedule_daemon_event.set()
+def init_hw():
+	print 'hw init'
+	gpio_set_mode()
+	for group in HardwareGroup.select():
+		group.pump_status = False
+		group.fan_status = False
+		
+	for pump in Pump.select().where(Pump.group != None):
+		spawn_pump_daemon(pump)
+	for fan in Fan.select().where(Fan.group != None):
+		spawn_fan_daemon(fan.id)
+	for light in Light.select().where(Light.group != None):
+		spawn_light_daemon(light, light.group)
 
 #################################################################
 #					Schedule Lights
@@ -111,7 +87,7 @@ def kill_light_daemon(light):
 		light.group.save()
 
 #################################################################
-#					Poll Sensors for Data
+#				Poll & Monitor Sensors
 #################################################################
 
 def check_therm():
@@ -125,69 +101,37 @@ def check_hygro():
 		soil_hygro.save()
 
 def sensor_poller():
-	while True:
-		check_therm()
-		check_hygro()
-		sleep(poll_sensor_interval)	
+	check_therm()
+	check_hygro()
+	for group in HardwareGroup.select():
+		check_triggers(group)
 
 def start_sensor_poller():
-	sensor_poller_daemon = Thread(target = sensor_poller, name = 'sensor_poller')
-	sensor_poller_daemon.setDaemon(True)
-	sensor_poller_daemon.start()
-
-#################################################################
-#					Monitor Polled Sensor Data
-#################################################################
-
-def sensor_monitor():
-	while True:
-		for group in HardwareGroup.select():
-			check_triggers(group.id)
-		sleep(monitor_sensor_interval)
-
-def start_sensor_monitor():
-	init_hw()
-	sensor_monitor_daemon = Thread(target = sensor_monitor, name = 'sensor_monitor')
-	sensor_monitor_daemon.setDaemon(True)
-	sensor_monitor_daemon.start()
+	schedule.every(poll_sensor_interval).seconds.do(sensor_poller)
 
 #################################################################
 #					Monitor Pumps for Action
 #################################################################
 
-def pump_monitor(pump_id, stop_event):
-	while not stop_event.is_set():
-		pump = Pump.get(Pump.id == pump_id)
-		group = pump.group
-		#print '            pump daemon running for:', pump.name, 'group:', group.name, 'status:', group.pump_status
-		#while the pump's group is pumping
-		if pump.group.pump_status:
-			#pump for the run time
-			sleep(pump.run_time)
-			#stop for the sleep time
-			gpio_out(pump.gpio_pin, False)
-			sleep(pump.sleep_time)
-		#wait to recheck the group's pumping status
-		else:
-			sleep(monitor_action_interval)
-	print '            pump daemon ending for:', pump.name
-	#turn off pin before end
-	gpio_out(pump.gpio_pin, False)
+def pump_monitor(pump):
+	#if we need to pump
+	if pump.group.pump_status:
+		#pump for run time percent until the next check
+		gpio_out(pump.gpio_pin, True)
+		sleep(monitor_action_interval * pump.run_time / 100)
+		gpio_out(pump.gpio_pin, False)
 
-def spawn_pump_daemon(pump_id):
-	pump = Pump.get(Pump.id == pump_id)
+def spawn_pump_daemon(pump):
 	print '        spawning daemon for ', pump.name
 	gpio_setup_out(pump.gpio_pin)
-	kill_pump_monitor_daemon_event = Event()
-	pump_monitor_daemon = Thread(target = pump_monitor, name = pump.name + '_monitor', args = (pump.id, kill_pump_monitor_daemon_event))
-	pump_monitor_daemon.setDaemon(True)
-	pump_monitor_daemon.start()
-	pump_daemons[pump.id] = kill_pump_monitor_daemon_event
+	job = schedule.every(monitor_action_interval).seconds.do(pump_monitor, pump)
+	pump_jobs[pump.id] = job
 
-def kill_pump_daemon(pump_id):
-	pump = Pump.get(Pump.id == pump_id)
+def kill_pump_daemon(pump):
 	print 'killing daemon for ', pump.name
-	pump_daemons[pump.id].set()
+	job = pump_jobs[pump.id]
+	schedule.cancel_job(job)
+	gpio_out(pump.gpio_pin, False)
 
 #################################################################
 #					Monitor Fans for Action
@@ -228,22 +172,7 @@ def kill_fan_daemon(fan_id):
 	print 'killing daemon for ', fan.name
 	fan_daemons[fan.id].set()
 
-#################################################################
-#					Init HW for Daemons
-#################################################################
-def init_hw():
-	print 'hw init'
-	gpio_set_mode()
-	for group in HardwareGroup.select():
-		group.pump_status = False
-		group.fan_status = False
-		
-	for pump in Pump.select().where(Pump.group != None):
-		spawn_pump_daemon(pump.id)
-	for fan in Fan.select().where(Fan.group != None):
-		spawn_fan_daemon(fan.id)
-	for light in Light.select().where(Light.group != None):
-		spawn_light_daemon(light, light.group)
+
 
 
 
