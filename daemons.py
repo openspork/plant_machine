@@ -1,9 +1,12 @@
 from hw_models import *
 from hardware import *
 from triggers import check_triggers
-from threading import Thread, Event
+from threading import Thread, Event, Timer, current_thread
 from time import sleep
-from datetime import timedelta
+from datetime import datetime, timedelta
+import schedule
+import functools
+from utils.utils import time_in_range
 
 poll_sensor_interval = 5
 monitor_sensor_interval = 10
@@ -11,6 +14,101 @@ monitor_action_interval = 2
 
 pump_daemons = {}
 fan_daemons = {}
+
+light_jobs = {}
+kill_schedule_daemon_event = Event()
+
+#################################################################
+#					Scheduling
+#################################################################
+
+#catch errors
+def catch_exceptions(job_func, cancel_on_failure=False):
+    @functools.wraps(job_func)
+    def wrapper(*args, **kwargs):
+        try:
+            return job_func(*args, **kwargs)
+        except:
+            import traceback
+            print(traceback.format_exc())
+            if cancel_on_failure:
+                return schedule.CancelJob
+    return wrapper
+
+#job threader
+def schedule_threaded(job_func):
+    job_thread = threading.Thread(target=job_func)
+    job_thread.start()
+
+#check the schedule
+def schedule_daemon(stop_event):
+	while not stop_event.is_set():
+		schedule.run_pending()
+		sleep(1)
+	print '            schdule daemon ending for'
+
+#start the scheduler
+def spawn_schedule_daemon():
+	print 'starting job scheduler'
+	daemon = Thread(target = schedule_daemon, name = 'job scheduler', args = (kill_schedule_daemon_event,))
+	daemon.setDaemon(True)
+	daemon.start()
+
+#kill the scheduler
+def kill_schedule_daemon():
+	print 'killing scheduler'
+	kill_schedule_daemon_event.set()
+
+#################################################################
+#					Schedule Lights
+#################################################################
+
+#@catch_exceptions(cancel_on_failure=False)
+def lights_on(light):
+	gpio_out(light.gpio_pin, True)
+	light.group.light_status = True
+	light.group.save()
+
+#@catch_exceptions(cancel_on_failure=False)
+def lights_off(light):
+	gpio_out(light.gpio_pin, False)
+	light.group.light_status = False
+	light.group.save()
+
+def spawn_light_daemon(light, group):
+	print '        scheduling light: ', light.name
+	start_time = group.light_start_time
+	stop_time = group.light_stop_time
+
+	start_job = schedule.every().day.at(start_time.strftime('%H:%M')).do(lights_on, light)
+	stop_job = schedule.every().day.at(stop_time.strftime('%H:%M')).do(lights_off, light)
+
+	#store the jobs in dict as a tuple
+	light_jobs[light.id] = (start_job, stop_job)
+
+	#prepare the job
+	gpio_setup_out(light.gpio_pin)
+
+	#turn on light & update status if currently needs to be on
+	current_time = datetime.now().time()
+	if time_in_range(start_time, stop_time, current_time):
+		gpio_out(light.gpio_pin, True)
+		light.group.light_status = True
+		light.group.save()
+	else:
+		light.group.light_status = False
+		light.group.save()
+
+def kill_light_daemon(light):
+	print '        unscheduling light: ', light.name
+	jobs = light_jobs[light.id]
+	for job in jobs:
+		schedule.cancel_job(job)
+	light_jobs.pop(light.id)
+	#clear light status if no more lights
+	if Light.select().where(Light.group == light.group).count() == 1:
+		light.group.light_status = None
+		light.group.save()
 
 #################################################################
 #					Poll Sensors for Data
@@ -65,7 +163,6 @@ def pump_monitor(pump_id, stop_event):
 		#while the pump's group is pumping
 		if pump.group.pump_status:
 			#pump for the run time
-			gpio_out(pump.gpio_pin, True)
 			sleep(pump.run_time)
 			#stop for the sleep time
 			gpio_out(pump.gpio_pin, False)
@@ -140,11 +237,13 @@ def init_hw():
 	for group in HardwareGroup.select():
 		group.pump_status = False
 		group.fan_status = False
-
+		
 	for pump in Pump.select().where(Pump.group != None):
 		spawn_pump_daemon(pump.id)
 	for fan in Fan.select().where(Fan.group != None):
 		spawn_fan_daemon(fan.id)
+	for light in Light.select().where(Light.group != None):
+		spawn_light_daemon(light, light.group)
 
 
 

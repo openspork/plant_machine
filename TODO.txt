@@ -1,4 +1,10 @@
 to complete:
 
-cleanup exceptions thrown by daemons on dev rem / del
+add schedule times to GUI
+move all daemons to scheduler
+remove redundant database queries (in views & daemons)
+move database queries out of templates
 
+
+Dependencies:
+flask

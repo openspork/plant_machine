@@ -40,34 +40,34 @@ def check_soil_hygrometers(group_id):
 
 def check_triggers(group_id):
 	group = HardwareGroup.get(HardwareGroup.id == group_id)
-	print '\n\n        checking triggers for:', group.name, '\n'
+	#print '\n\n        checking triggers for:', group.name, '\n'
 	
 	therm_trigger_results = check_soil_thermometers(group)
 	hygro_trigger_results = check_soil_hygrometers(group)
 
 	if therm_trigger_results[0] or hygro_trigger_results[0]: #we need to pump
-		print '        pump needs to be on'
+		#print '        pump needs to be on'
 		if not group.pump_status: #if not already pumping, start
-			print '            pump off, starting'
+			#print '            pump off, starting'
 			group.pump_status = True
 			group.save()
 	else: #we do not need to pump
-		print '        pump needs to be off'
+		#print '        pump needs to be off'
 		if group.pump_status: #if already pumping, stop
-			print '            pump on, stopping'
+			#print '            pump on, stopping'
 			group.pump_status = False
 			group.save()
 	
 	if therm_trigger_results[1] or hygro_trigger_results[1]: #we need to fan
-		print '        fan needs to be on'
+		#print '        fan needs to be on'
 		if not group.fan_status: #if not already fanning, start
-			print '            fan off, starting'
+			#print '            fan off, starting'
 			group.fan_status = True
 			group.save()
 	else: #we do not need to fan
-		print '        fan needs to be off'
+		#print '        fan needs to be off'
 		if group.fan_status: #if already fanning, stop
-			print '            pump on, stopping'
+			#print '            pump on, stopping'
 			group.fan_status = False
 			group.save()
 

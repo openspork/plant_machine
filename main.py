@@ -2,18 +2,18 @@ from app import app
 from hw_models import hw_db
 from views  import *
 import atexit
-from daemons import start_sensor_monitor, start_sensor_poller
+from daemons import start_sensor_monitor, start_sensor_poller, spawn_schedule_daemon
 from hardware import cleanup_hw
 
 #connects to DB and init tables if not present
 def init_db():
 	hw_db.connect() #connect to db
-	print 'opened hw db!'
-	hw_db.create_tables([HardwareGroup, SoilHygrometer, SoilThermometer, Pump, Fan], safe = True) #create tables if not present
+	print('opened hw db!')
+	hw_db.create_tables([HardwareGroup, SoilHygrometer, SoilThermometer, Pump, Fan, Light], safe = True) #create tables if not present
 	
 def term():
 	hw_db.close()
-	print 'closed db!'
+	print('closed db!')
 	cleanup_hw()
 
 def init():
@@ -22,6 +22,7 @@ def init():
 
 	start_sensor_poller()
 	start_sensor_monitor()
+	spawn_schedule_daemon()
 
 if __name__ == '__main__':
 	init()
