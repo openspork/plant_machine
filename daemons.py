@@ -3,9 +3,10 @@ from hardware import *
 from triggers import check_triggers
 from threading import Thread, Event, Timer, current_thread
 from time import sleep
-from datetime import timedelta
+from datetime import datetime, timedelta
 import schedule
 import functools
+from utils.utils import time_in_range
 
 poll_sensor_interval = 5
 monitor_sensor_interval = 10
@@ -62,22 +63,27 @@ def kill_schedule_daemon():
 #					Schedule Lights
 #################################################################
 
-@catch_exceptions()
+#@catch_exceptions(cancel_on_failure=False)
 def lights_on(light):
 	print '!!!!!!!!! turning', light.name, 'on'
 	gpio_out(light.gpio_pin, True)
+	light.group.light_status = True
+	light.group.save()
 
-@catch_exceptions()
+#@catch_exceptions(cancel_on_failure=False)
 def lights_off(light):
 	print '!!!!!!!!! turning', light.name, 'off'
 	gpio_out(light.gpio_pin, False)
+	light.group.light_status = False
+	light.group.save()
 
-def spawn_light_daemon(light):
+def spawn_light_daemon(light, group):
 	print '        scheduling light: ', light.name
-	# start_job = schedule.every().day.at(Light.group.light_start_time).do(lights_on, light)
-	# stop_job = schedule.every().day.at(Light.group.light_off_time).do(lights_off, light)
-	start_job = schedule.every(2).seconds.do(lights_on, light)
-	stop_job = schedule.every(3).seconds.do(lights_off, light)
+	start_time = group.light_start_time
+	stop_time = group.light_stop_time
+
+	start_job = schedule.every().day.at(start_time.strftime('%H:%M')).do(lights_on, light)
+	stop_job = schedule.every().day.at(stop_time.strftime('%H:%M')).do(lights_off, light)
 
 	#store the jobs in dict as a tuple
 	light_jobs[light.id] = (start_job, stop_job)
@@ -85,9 +91,20 @@ def spawn_light_daemon(light):
 	#prepare the job
 	gpio_setup_out(light.gpio_pin)
 
+	#turn on light & update status if currently needs to be on
+	current_time = datetime.now().time()
+	if time_in_range(start_time, stop_time, current_time):
+		gpio_out(light.gpio_pin, True)
+		light.group.light_status = True
+		light.group.save()
+	else:
+		light.group.light_status = False
+		light.group.save()
+
 def kill_light_daemon(light):
 	print '        unscheduling light: ', light.name
-	for job in light_jobs[light.id]:
+	jobs = light_jobs[light.id]
+	for job in jobs:
 		schedule.cancel_job(job)
 	light_jobs.pop(light.id)
 
@@ -144,7 +161,6 @@ def pump_monitor(pump_id, stop_event):
 		#while the pump's group is pumping
 		if pump.group.pump_status:
 			#pump for the run time
-			gpio_out(pump.gpio_pin, True)
 			sleep(pump.run_time)
 			#stop for the sleep time
 			gpio_out(pump.gpio_pin, False)

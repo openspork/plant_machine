@@ -19,7 +19,7 @@ class HardwareGroup(HardwareBase):
 
 	light_start_time = TimeField()
 	light_stop_time = TimeField()
-	fan_status = BooleanField(null = True)
+	light_status = BooleanField(null = True)
 
 class SoilThermometer(HardwareBase):
 	group = ForeignKeyField(HardwareGroup, related_name = 'soil_thermometers', null = True)

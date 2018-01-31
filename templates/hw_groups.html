@@ -1,16 +1,26 @@
 <!-- list current hardware groups -->
 <h3>Current Hardware Groups:</h3>
 
-	{% for hw_group in HardwareGroup.select() %}
+	{% for hw_group in hw_groups %}
 		<b>{{ hw_group.name }}</b><button id =  "del_hwg_{{ hw_group.id }}" type="button">Delete</button>
 		<br>
 		Pump temp threshold: {{ hw_group.pump_temp_threshold }}
 		<br>
 		Pump moisture threshold: {{ hw_group.pump_moist_threshold }}
 		<br>
-		Fan temp threshold {{ hw_group.fan_temp_threshold }}
+		Pump status: {{ hw_group.pump_status }}
 		<br>
-		Fan moisture threshold {{ hw_group.fan_moist_threshold }}
+		Fan temp threshold: {{ hw_group.fan_temp_threshold }}
+		<br>
+		Fan moisture threshold: {{ hw_group.fan_moist_threshold }}
+		<br>
+		Fan status: {{ hw_group.fan_status }}
+		<br>
+		Light start time: {{ hw_group.light_start_time.strftime('%H:%M') }}
+		<br>
+		Light stop time: {{ hw_group.light_stop_time.strftime('%H:%M') }}
+		<br>
+		Light status: {{ hw_group.light_status }}
 		<br>
 		<br>
 		<i>Soil Thermometers:</i>
