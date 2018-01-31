@@ -31,7 +31,9 @@ $(document).on("click", "button", function(){
             pmp_temp_thresh: $('#add_hwg_pmp_temp_thresh').val(),
             pmp_moist_thresh: $('#add_hwg_pmp_moist_thresh').val(),            
             fan_temp_thresh: $('#add_hwg_fan_temp_thresh').val(),
-            fan_moist_thresh: $('#add_hwg_fan_moist_thresh').val()            
+            fan_moist_thresh: $('#add_hwg_fan_moist_thresh').val(),
+            lgt_start_time: $('#add_hwg_lgt_start_time').val(),
+            lgt_stop_time: $('#add_hwg_lgt_stop_time').val() 
           }, function(data){
             reloadElements()
           });
@@ -67,7 +69,15 @@ $(document).on("click", "button", function(){
           }, function(data){
             reloadElements()
           });
-          break                                 
+          break
+        case "lgt":
+            $.post (instr, { 
+            name: $('#add_lgt_name').val(),
+            pin: $('#add_lgt_pin').val()
+          }, function(data){
+            reloadElements()
+          });
+          break                            
       }
       break //break from "add" case
     case "ass":
@@ -76,12 +86,12 @@ $(document).on("click", "button", function(){
       }, function(data){
         reloadElements()
       });
-      break //break from "add" case                         
+      break //break from "ass" case                         
     case "rem":
     case "del":
       $.post(instr, function(data){
         reloadElements()
       })
       break // break from "rem", "del" cases
-}
+  }
 });
