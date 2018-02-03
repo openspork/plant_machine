@@ -1,7 +1,13 @@
-div {
+body{
 	font-family: 'Helvetica', 'Arial', sans-serif;
 	color: MidnightBlue;
 	background-color: LightGreen;
+}
+
+div {
+	border: .05em;
+	border-style: solid;
+	border-color: MidnightBlue;
 }
 
 .numinput {
@@ -10,4 +16,26 @@ div {
 
 .textinput {
 	width: 6em;
+}
+
+#hw_groups {
+	width: 30%;
+	float: left;
+
+}
+
+#unass_resources {
+	width: 30%;
+	float: left;
+
+}
+
+#add_resources {
+	width: 30%;
+	float: left;
+}
+
+.ed_hwg {
+	display: none;
+
 }

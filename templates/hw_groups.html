@@ -2,23 +2,54 @@
 <h3>Current Hardware Groups:</h3>
 
 	{% for hw_group in hw_groups %}
-		<b>{{ hw_group.name }}</b><button id =  "del_hwg_{{ hw_group.id }}" type="button">Delete</button>
+		<b class = "hwg_val_{{ hw_group.id }}">{{ hw_group.name }}</b>
+		<input type = "text" class = "ed_hwg ed_hwg_{{ hw_group.id }} textinput" id = "ed_hwg_{{ hw_group.id }}_name" value = "{{ hw_group.name }}">
 		<br>
-		Pump temp threshold: {{ hw_group.pump_temp_threshold }}
+
+		<button type = "button" id = "ed_hwg_{{ hw_group.id }}">Edit</button>
+		<button type = "button" class = "ed_hwg" id = "upd_hwg_{{ hw_group.id }}">Update</button>
+		<button type = "button" id = "del_hwg_{{ hw_group.id }}">Delete</button>
+
 		<br>
-		Pump moisture threshold: {{ hw_group.pump_moist_threshold }}
+		Pump temp threshold:
+		<text class = "hwg_val_{{ hw_group.id }}">
+			{{ hw_group.pump_temp_threshold }}
+		</text>
+		<input type = "text" class = "ed_hwg ed_hwg_{{ hw_group.id }} numinput" id = "ed_hwg_{{ hw_group.id }}_pmp_temp_thresh" value = "{{ hw_group.pump_temp_threshold }}">
+		<br>
+		Pump moisture threshold:
+		<text class = "hwg_val_{{ hw_group.id }}">
+			{{ hw_group.pump_moist_threshold }}
+		</text>
+		<input type = "text" class = "ed_hwg ed_hwg_{{ hw_group.id }} numinput" id = "ed_hwg_{{ hw_group.id }}_pmp_moist_thresh" value = "{{ hw_group.pump_moist_threshold }}">
 		<br>
 		Pump status: {{ hw_group.pump_status }}
 		<br>
-		Fan temp threshold: {{ hw_group.fan_temp_threshold }}
+		Fan temp threshold:
+		<text class = "hwg_val_{{ hw_group.id }}">
+			{{ hw_group.fan_temp_threshold }}
+		</text>
+		<input type = "text" class = "ed_hwg ed_hwg_{{ hw_group.id }} numinput" id = "ed_hwg_{{ hw_group.id }}_fan_temp_thresh" value = "{{ hw_group.fan_temp_threshold }}">
 		<br>
-		Fan moisture threshold: {{ hw_group.fan_moist_threshold }}
+		Fan moisture threshold:
+		<text class = "hwg_val_{{ hw_group.id }}">
+			{{ hw_group.fan_moist_threshold }}
+		</text>
+		<input type = "text" class = "ed_hwg ed_hwg_{{ hw_group.id }} numinput" id = "ed_hwg_{{ hw_group.id }}_fan_moist_thresh" value = "{{ hw_group.fan_moist_threshold }}">
 		<br>
-		Fan status: {{ hw_group.fan_status }}
+		Fan status:{{ hw_group.fan_status }}
 		<br>
-		Light start time: {{ hw_group.light_start_time.strftime('%H:%M') }}
+		Light start time:
+		<text class = "hwg_val_{{ hw_group.id }}">
+			{{ hw_group.light_start_time.strftime('%H:%M') }}
+		</text>
+		<input type = "time" class = "ed_hwg ed_hwg_{{ hw_group.id }} timeinput" id = "ed_hwg_{{ hw_group.id }}_lgt_start_time" value = "{{ hw_group.light_start_time.strftime('%H:%M') }}">
 		<br>
-		Light stop time: {{ hw_group.light_stop_time.strftime('%H:%M') }}
+		Light stop time:
+		<text class = "hwg_val_{{ hw_group.id }}">
+			{{ hw_group.light_stop_time.strftime('%H:%M') }}
+		</text>
+		<input type = "time" class = "ed_hwg ed_hwg_{{ hw_group.id }} timeinput" id = "ed_hwg_{{ hw_group.id }}_lgt_stop_time" value = "{{ hw_group.light_stop_time.strftime('%H:%M') }}">
 		<br>
 		Light status: {{ hw_group.light_status }}
 		<br>

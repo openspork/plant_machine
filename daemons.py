@@ -14,8 +14,7 @@ poll_sensor_interval = 5
 monitor_action_interval = 10
 
 pump_jobs = {}
-fan_daemons = {}
-
+fan_jobs = {}
 light_jobs = {}
 
 #################################################################
@@ -128,7 +127,7 @@ def spawn_pump_daemon(pump):
 	pump_jobs[pump.id] = job
 
 def kill_pump_daemon(pump):
-	print 'killing daemon for ', pump.name
+	print '        killing daemon for ', pump.name
 	job = pump_jobs[pump.id]
 	schedule.cancel_job(job)
 	gpio_out(pump.gpio_pin, False)
@@ -137,42 +136,25 @@ def kill_pump_daemon(pump):
 #					Monitor Fans for Action
 #################################################################
 
-def fan_monitor(fan_id, stop_event):
-	while not stop_event.is_set():
-		fan = Fan.get(Fan.id == fan_id)
-		group = fan.group
-		#print '            fan daemon running for:', fan.name, 'group:', group.name, 'status:', group.fan_status
-		#while the fan's group is fanning
-		if fan.group.fan_status:
-			#fan for the run time
-			gpio_out(fan.gpio_pin, True)
-			sleep(fan.run_time)
-			#stop for the sleep time
-			gpio_out(fan.gpio_pin, False)
-			sleep(fan.sleep_time)
-		#wait to recheck the group's fanning status
-		else:
-			sleep(monitor_action_interval)
-	print '            fan daemon ending for:', fan.name
-	#turn off pin before end
-	gpio_out(fan.gpio_pin, False)
+def fan_monitor(fan):
+	#if we need to pump
+	if fan.group.pump_status:
+		#pump for run time percent until the next check
+		gpio_out(fan.gpio_pin, True)
+		sleep(monitor_action_interval * fan.run_time / 100)
+		gpio_out(fan.gpio_pin, False)
 
-def spawn_fan_daemon(fan_id):
-	fan = Fan.get(Fan.id == fan_id)
+def spawn_fan_daemon(fan):
 	print '        spawning daemon for ', fan.name
 	gpio_setup_out(fan.gpio_pin)
-	kill_fan_monitor_daemon_event = Event()
-	fan_monitor_daemon = Thread(target = fan_monitor, name = fan.name + '_monitor', args = (fan.id, kill_fan_monitor_daemon_event))
-	fan_monitor_daemon.setDaemon(True)
-	fan_monitor_daemon.start()
-	fan_daemons[fan.id] = kill_fan_monitor_daemon_event
+	job = schedule.every(monitor_action_interval).seconds.do(fan_monitor, fan)
+	fan_jobs[fan.id] = job
 
-def kill_fan_daemon(fan_id):
-	fan = Fan.get(Fan.id == fan_id)
-	print 'killing daemon for ', fan.name
-	fan_daemons[fan.id].set()
-
-
+def kill_fan_daemon(fan):
+	print '        killing daemon for ', fan.name
+	job = fan_jobs[fan.id]
+	schedule.cancel_job(job)
+	gpio_out(fan.gpio_pin, False)
 
 
 

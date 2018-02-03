@@ -30,12 +30,16 @@
 	New Soil Thermometer 
 	Name: <input type="text" class="textinput" id="add_sth_name">
 	Address: 
-	<select id="add_sth_addr">
-	{% for address in addresses %}
-		<option value='{{ address[0] }}'>{{ address[0] }}, curr temp: {{ address[1][1] }}</option>
-	{% endfor %}
+
+		<select id="add_sth_addr">
+		{% for address in addresses %}
+			<option value='{{ address[0] }}'>{{ address[0] }} {% if address[1] %} , curr temp: {{ address[1][1] }} {% endif %}</option>
+		{% endfor %}
+
 	</select>
 	<button id = "add_sth" type="button">Add</button>
+
+	<button id = "add_qry" type="button">Query Values</button>
 
 	<br>
 
