@@ -3,7 +3,7 @@ from hw_models import hw_db
 from views  import *
 import atexit
 from daemons import init_hw, start_sensor_poller
-from hardware import cleanup_hw
+from hardware import cleanup_hw, get_therm_addresses
 from scheduler.scheduler import spawn_schedule_daemon
 
 #connects to DB and init tables if not present
@@ -24,6 +24,7 @@ def init():
 
 	start_sensor_poller()
 	spawn_schedule_daemon()
+
 
 if __name__ == '__main__':
 	init()

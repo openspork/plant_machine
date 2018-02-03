@@ -1,3 +1,6 @@
+from glob import glob
+from os.path import basename
+
 import RPi.GPIO as GPIO
 import Adafruit_GPIO.SPI as SPI
 import Adafruit_MCP3008
@@ -22,6 +25,14 @@ def gpio_out(pin, on):
 	else:
 		GPIO.output(pin, GPIO.LOW)
 		#print '*** gpio pin low ***', pin
+
+def get_therm_addresses():
+	addresses = []
+	raw_addresses = glob('/sys/bus/w1/devices/28*')
+	for raw_address in raw_addresses:
+		address = basename(raw_address)
+		addresses.append(address)
+	return addresses
 
 def get_temp(address):
 	file = open('/sys/bus/w1/devices/' + address + '/w1_slave', 'r')

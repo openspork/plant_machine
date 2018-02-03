@@ -6,15 +6,17 @@ def check_soil_thermometers(group):
 	#handle therm sensors
 	for soil_therm in group.soil_thermometers.select():
 		#handle pumps
-		print '        PUMP MONITOR: processing THERM:"', soil_therm.name, '" curr reading:', soil_therm.curr_reading, 'pump thresh:', group.pump_temp_threshold
-		if (soil_therm.curr_reading > group.pump_temp_threshold):
-			#print '        therm past pump threshold'
-			pump_triggered = True
+		if group.soil_thermometers:
+			print '        PUMP MONITOR: processing THERM:"', soil_therm.name, '" curr reading:', soil_therm.curr_reading, 'pump thresh:', group.pump_temp_threshold
+			if (soil_therm.curr_reading > group.pump_temp_threshold):
+				#print '        therm past pump threshold'
+				pump_triggered = True
 		#handle fans
-		print '        FAN MONITOR: processing THERM:"', soil_therm.name, '" curr reading:', soil_therm.curr_reading, 'fan thresh:', group.fan_temp_threshold
-		if (soil_therm.curr_reading > group.fan_temp_threshold):
-			#print '        therm past fan threshold'
-			fan_triggered = True
+		if group.soil_hygrometers:
+			print '        FAN MONITOR: processing THERM:"', soil_therm.name, '" curr reading:', soil_therm.curr_reading, 'fan thresh:', group.fan_temp_threshold
+			if (soil_therm.curr_reading > group.fan_temp_threshold):
+				#print '        therm past fan threshold'
+				fan_triggered = True
 	return pump_triggered, fan_triggered
 
 
@@ -24,22 +26,29 @@ def check_soil_hygrometers(group):
 	#handle moisture sensors
 	for soil_hygro in group.soil_hygrometers.select():
 		#handle pumps
-		print '        PUMP MONITOR: processing HYGRO:"', soil_hygro.name, '" curr reading:', soil_hygro.curr_reading, 'pump thresh:', group.pump_temp_threshold
-		if (soil_hygro.curr_reading > group.pump_temp_threshold):
-			#print '        hygro past pump threshold'
-			pump_triggered = True
+		if group.soil_thermometers:
+			print '        PUMP MONITOR: processing HYGRO:"', soil_hygro.name, '" curr reading:', soil_hygro.curr_reading, 'pump thresh:', group.pump_temp_threshold
+			if (soil_hygro.curr_reading > group.pump_temp_threshold):
+				#print '        hygro past pump threshold'
+				pump_triggered = True
 		#handle fans
-		print '        FAN MONITOR processing HYGRO:"', soil_hygro.name, '" curr reading:', soil_hygro.curr_reading, 'fan thresh:', group.fan_temp_threshold
-		if (soil_hygro.curr_reading > group.fan_temp_threshold):
-			#print '        hygro past fan threshold'
-			fan_triggered = True
+		if group.soil_hygrometers:
+			print '        FAN MONITOR processing HYGRO:"', soil_hygro.name, '" curr reading:', soil_hygro.curr_reading, 'fan thresh:', group.fan_temp_threshold
+			if (soil_hygro.curr_reading > group.fan_temp_threshold):
+				#print '        hygro past fan threshold'
+				fan_triggered = True
 	return pump_triggered, fan_triggered
 
 def check_triggers(group):
-	#print '\n\n        checking triggers for:', group.name, '\n'
-	
-	therm_trigger_results = check_soil_thermometers(group)
-	hygro_trigger_results = check_soil_hygrometers(group)
+	#print '        checking triggers for:', group.name, '\n'
+	if group.soil_thermometers:
+		therm_trigger_results = check_soil_thermometers(group)
+	else:
+		therm_trigger_results = (None, None)
+	if group.soil_hygrometers:
+		hygro_trigger_results = check_soil_hygrometers(group)
+	else:
+		hygro_trigger_results = (None, None)
 
 	if therm_trigger_results[0] or hygro_trigger_results[0]: #we need to pump
 		#print '        pump needs to be on'

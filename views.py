@@ -1,14 +1,13 @@
 from flask import Flask, abort, render_template, url_for, redirect, send_file, request, send_from_directory
 from app import app
 from hw_models import *
-from hardware import get_temp
+from hardware import get_therm_addresses, get_temp
 from daemons import spawn_pump_daemon, kill_pump_daemon, spawn_fan_daemon, kill_fan_daemon, spawn_light_daemon, kill_light_daemon
-from glob import glob
-from os.path import basename
+
 #from datetime import timedelta
 
-@app.route('/<op>/<model>', methods=['POST'])
-@app.route('/<op>/<model>/<id>', methods=['POST'])
+@app.route('/<op>/<model>', methods = ['POST'])
+@app.route('/<op>/<model>/<id>', methods = ['POST'])
 def update(op, model, id = None):
 	print op, model, id
 
@@ -110,18 +109,28 @@ def unass_resources():
 	pumps = Pump.select().where(Pump.group == None)
 	fans = Fan.select().where(Fan.group == None)
 	lights = Light.select().where(Light.group == None)
-	return render_template('unass_resources.html', hw_groups = hw_groups, soil_thermometers = soil_thermometers, soil_hygrometers = soil_hygrometers, pumps = pumps, fans = fans, lights = lights)
+	return render_template(
+		'unass_resources.html',
+		hw_groups = hw_groups,
+		soil_thermometers = soil_thermometers,
+		soil_hygrometers = soil_hygrometers,
+		pumps = pumps,
+		fans = fans,
+		lights = lights)
 
 @app.route('/add_resources')
 def add_resources():
-	addresses = []
-	raw_addresses = glob('/sys/bus/w1/devices/28*')
-	for raw_address in raw_addresses:
-		address = basename(raw_address)
+	addresses_and_temps = []
+	for address in get_therm_addresses():
 		address_and_temp = (address, get_temp(address))
-		addresses.append(address_and_temp)
+		addresses_and_temps.append(address_and_temp)	
 
-	return render_template('add_resources.html', addresses = addresses)
+	return render_template('add_resources.html', addresses = addresses_and_temps)
+
+@app.route('/add_resources/query_hw', methods = ['POST'])
+def query_hw():
+
+	redirect(url_for('index'))
 
 @app.route('/favicon.ico')
 def favicon():
