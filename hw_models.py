@@ -5,6 +5,8 @@ from app import hw_db
 class HardwareBase(Model):
 	class Meta:
 		database = hw_db
+	def refresh(self):
+		return type(self).get(self._pk_expr())
 
 class HardwareGroup(HardwareBase):
 	name = CharField()

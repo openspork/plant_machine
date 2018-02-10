@@ -1,9 +1,13 @@
 to complete:
 
-add schedule times to GUI
-move all daemons to scheduler
-remove redundant database queries (in views & daemons)
-move database queries out of templates
+copy pump func to fans
+add runtimes to GUI
+
+
+DONE add schedule times to GUI
+DONE move all daemons to scheduler
+DONE remove redundant database queries (in views & daemons)
+DONE move database queries out of templates
 
 
 Dependencies:

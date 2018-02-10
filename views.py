@@ -68,9 +68,9 @@ def update(op, model, id = None):
 		elif model == 'shy':
 			instance = SoilHygrometer.create(name = request.form['name'], channel = request.form['chan'])
 		elif model == 'pmp':
-			instance = Pump.create(name = request.form['name'], gpio_pin = int(request.form['pin']), run_time = 50)
+			instance = Pump.create(name = request.form['name'], gpio_pin = int(request.form['pin']), run_time = 100)
 		elif model == 'fan':
-			instance = Fan.create(name = request.form['name'], gpio_pin = int(request.form['pin']), run_time = 50)
+			instance = Fan.create(name = request.form['name'], gpio_pin = int(request.form['pin']), run_time = 100)
 		elif model == 'lgt':
 			instance = Light.create(name = request.form['name'], gpio_pin = int(request.form['pin']))
 		instance.save()
