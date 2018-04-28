@@ -1,5 +1,5 @@
 # plant_machine
-Raspi grow operation:
+Raspi grow operater:
 
 * HTML / JQuery based GUI
 
@@ -10,4 +10,3 @@ Raspi grow operation:
 * Actuates pumps / fans by threshold
 
 * Actuates lights by scheduler
-
