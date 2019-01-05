@@ -1,9 +1,10 @@
 to complete:
 
-copy pump func to fans
 add runtimes to GUI
+don't cycle fan/pumps for 100% runtimes
+websocket GUI
 
-
+DONE copy pump func to fans
 DONE add schedule times to GUI
 DONE move all daemons to scheduler
 DONE remove redundant database queries (in views & daemons)

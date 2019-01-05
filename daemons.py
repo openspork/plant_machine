@@ -11,7 +11,7 @@ from scheduler.scheduler import schedule
 poll_sensor_interval = 2
 
 #frequency at which pump / fan daemons check instructions
-monitor_action_interval = 2
+monitor_action_interval = 10
 
 pump_jobs = {}
 fan_jobs = {}
@@ -38,7 +38,7 @@ def init_hw():
 #                   Multithread Jobs
 #################################################################
 def run_threaded_monitor(job_func, job_arg):
-    print ('spawning thread %s' % job_func)
+    #print ('spawning thread %s' % job_func)
     job_thread = Thread(target=job_func, args=(job_arg,))
     job_thread.start()
 
@@ -158,9 +158,9 @@ def kill_pump_daemon(pump):
 def fan_monitor(fan):
     #refresh so we check for updated status
     fan = fan.refresh()
-    #if we need to pump
+    #if we need to fan
     if fan.group.fan_status:
-        #pump for run time percent until the next check
+        #fan for run time percent until the next check
         run_time = monitor_action_interval * fan.run_time / 100
         print ('fanning for ' + str(run_time) + ' of next ' + str(monitor_action_interval) + ' seconds')
         gpio_out(fan.gpio_pin, True)
@@ -170,7 +170,7 @@ def fan_monitor(fan):
 def spawn_fan_daemon(fan):
     print '        spawning daemon for ', fan.name
     gpio_setup_out(fan.gpio_pin)
-    job = schedule.every(monitor_action_interval).seconds.do(fan_monitor, fan)
+    job = schedule.every(monitor_action_interval).seconds.do(run_threaded_monitor, fan_monitor, fan)
     fan_jobs[fan.id] = job
 
 def kill_fan_daemon(fan):
