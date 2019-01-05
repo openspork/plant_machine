@@ -1,9 +1,11 @@
 to complete:
 
+fix bug when unassigning fan/pump from group, appears jobs aren't cancelling
 add runtimes to GUI
-don't cycle fan/pumps for 100% runtimes
 websocket GUI
+proper logging
 
+DONE don't cycle fan/pumps for 100% runtimes
 DONE copy pump func to fans
 DONE add schedule times to GUI
 DONE move all daemons to scheduler

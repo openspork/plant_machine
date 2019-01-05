@@ -137,7 +137,8 @@ def pump_monitor(pump):
             sleep(run_time)
             gpio_out(pump.gpio_pin, False)
     else:
-        gpio_out(pump.gpio_pin, False)
+        if pump.run_time == 100:
+            gpio_out(pump.gpio_pin, False)
     
 def spawn_pump_daemon(pump):
     print '        spawning daemon for ', pump.name
@@ -160,12 +161,19 @@ def fan_monitor(fan):
     fan = fan.refresh()
     #if we need to fan
     if fan.group.fan_status:
-        #fan for run time percent until the next check
-        run_time = monitor_action_interval * fan.run_time / 100
-        print ('fanning for ' + str(run_time) + ' of next ' + str(monitor_action_interval) + ' seconds')
-        gpio_out(fan.gpio_pin, True)
-        sleep(run_time)
-        gpio_out(fan.gpio_pin, False)
+        #if we are constantly fanning
+        if fan.run_time == 100:
+            gpio_out(fan.gpio_pin, True)
+        else:
+            #fan for run time percent until the next check
+            run_time = monitor_action_interval * fan.run_time / 100
+            print ('fanning for ' + str(run_time) + ' of next ' + str(monitor_action_interval) + ' seconds')
+            gpio_out(fan.gpio_pin, True)
+            sleep(run_time)
+            gpio_out(fan.gpio_pin, False)
+    else:
+        if fan.run_time == 100:
+            gpio_out(fan.gpio_pin, False)
 
 def spawn_fan_daemon(fan):
     print '        spawning daemon for ', fan.name
